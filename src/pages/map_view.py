@@ -2,7 +2,7 @@ from dash import html, register_page, dcc, get_asset_url
 import dash_bootstrap_components as dbc
 from pathlib import Path
 import pandas as pd
-import src.app as app
+from figures import create_scatter_mapbox
 
 
 # Register the page with the Dash app
@@ -12,7 +12,7 @@ raw_data = Path(__file__).parent.parent.parent.joinpath('data','dataset_prepared
 data_df = pd.read_csv(raw_data)
 
 #Create map
-#map_fig = create_scatter_mapbox()
+map_fig = create_scatter_mapbox()
 
 #Create an array of regions
 regions = data_df['Region of HE provider'].unique()
@@ -41,8 +41,8 @@ row_one = dbc.Row([
     ])
 
 row_two = dbc.Row([
-    dbc.Col(children=[html.P(children=["Filter Regions", region_dropdown]), html.P(["Filter HEIs", hei_dropdown])], width=3, style={"background-color": "lightgrey"}),
-    dbc.Col([html.Div(id="map-view")], width=9)
+    dbc.Col(children=[html.P(children=["Filter Regions", region_dropdown], style={"background-color": "lightgrey"}), html.P(["Filter HEIs", hei_dropdown], style={"background-color": "lightgrey"} )], width=3),
+    dbc.Col(children=[dcc.Graph(figure=map_fig, id='england_map')], width=9)
 ])
 
 
