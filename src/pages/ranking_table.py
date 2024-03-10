@@ -1,5 +1,6 @@
 from dash import html, register_page, dcc, get_asset_url
 import dash_bootstrap_components as dbc
+from figures import create_ranking_table
 
 
 # Register the page with the Dash app
@@ -17,6 +18,8 @@ year_dropdown = dbc.Select(
     value="2021/22"
 )
 
+table = create_ranking_table("Transport and environment", "2021/22")
+
 row_one = dbc.Row([
         dbc.Col([html.H1("Ranking Table")], width=12)
     ])
@@ -27,7 +30,7 @@ row_two = dbc.Row([
 ])
 
 row_three = dbc.Row([
-    dbc.Col([html.Div(id="ranking-table")], width=12)
+    dbc.Col(children=table, width=12)
 ])
 
 layout = dbc.Container([
