@@ -54,9 +54,6 @@ def create_ranking_table(ClassName, AcademicYear):
     # Rename columns
     pivot_df.columns.name = None
 
-    # Save DataFrame to CSV
-    pivot_df.to_csv(Path(__file__).parent.parent.joinpath('data','pivot_df.csv'))
-
     # Converting to DataTable with sorting enabled
     table = dash_table.DataTable(
         id='ranking-table',
@@ -106,20 +103,35 @@ def create_card(ukprn):
     return card
 
 #Create a line chart where a user can select a HEI and also select a Category marker and then see the trend of all the categories within that Category marker over the years
-def create_line_chart(hei, category_marker):
+def create_line_chart(hei=None, Class=None, category_marker=None):
     # Load the dataset
     data_path = Path(__file__).parent.parent.joinpath('data','entry_data.csv')
     data_df = pd.read_csv(data_path)
-    cols = ['HE Provider', 'Academic Year', 'Class', 'Category', 'Value']
+    cols = ['Academic Year', 'HE Provider', 'Class', 'Category marker', 'Category', 'Value']
     data_df = data_df[cols]
 
     # Filter the DataFrame by 'HE Provider' and 'Category'
-    data_df = data_df[(data_df['HE Provider'] == hei) & (data_df['Category marker'] == category_marker)]
+    data_df = data_df[(data_df['HE Provider'] == hei) & (data_df['Category marker'] == category_marker) & (data_df['Class'] == Class)]
 
     # Convert 'Value' column to numeric, ignoring errors
     data_df['Value'] = pd.to_numeric(data_df['Value'], errors='coerce')
 
+    #Reorder so that the years are in ascending order
+    data_df = data_df.sort_values(by='Academic Year')
+
     # Create a line chart
-    fig = px.line(data_df, x='Academic Year', y='Value', color='Category',  title=f'Trend of {category_marker} categories for {hei}', markers=True)
+    fig = px.line(data_df, x='Academic Year', y='Value', color='Category', markers=True)
+
+    if category_marker != None:
+        fig.update_layout(title=f"Trend of '{category_marker}' categories:")
 
     return fig
+
+def create_category_marker_options(class_name):
+    # Load the dataset
+    data_path = Path(__file__).parent.parent.joinpath('data','entry_data.csv')
+    data_df = pd.read_csv(data_path)
+    data_df = data_df[data_df['Class'] == class_name]
+    category_markers = data_df['Category marker'].unique()
+    options = [category_marker for category_marker in category_markers]
+    return options

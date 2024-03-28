@@ -7,7 +7,7 @@ from figures import create_scatter_mapbox
 
 # Register the page with the Dash app
 register_page(__name__, name="Map View", path='/map_view')
-\
+
 raw_data = Path(__file__).parent.parent.parent.joinpath('data','dataset_prepared.csv')
 data_df = pd.read_csv(raw_data)
 

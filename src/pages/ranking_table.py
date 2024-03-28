@@ -8,7 +8,7 @@ register_page(__name__, name="Ranking Table", path='/ranking_table')
 
 class_dropdown = dbc.Select(
     id="class-dropdown",  # id uniquely identifies the element, will be needed later
-    options=["Buildings and spaces", "Energy", "Emissions and waste", "Transport and environment", "Finances and people"],
+    options=["Building and spaces", "Energy", "Emissions and waste", "Transport and environment", "Finances and people"],
     value="Building and spaces"
 )
 
