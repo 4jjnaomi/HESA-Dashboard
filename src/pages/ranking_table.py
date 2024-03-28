@@ -1,4 +1,4 @@
-from dash import html, register_page, dcc, get_asset_url
+from dash import html, register_page
 import dash_bootstrap_components as dbc
 from figures import create_ranking_table
 

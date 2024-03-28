@@ -1,4 +1,4 @@
-from dash import html, register_page, dcc, get_asset_url
+from dash import html, register_page, dcc
 import dash_bootstrap_components as dbc
 from pathlib import Path
 import pandas as pd

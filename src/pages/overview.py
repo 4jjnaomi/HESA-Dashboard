@@ -2,8 +2,6 @@ from dash import html, register_page, dcc
 import dash_bootstrap_components as dbc
 from urllib.parse import unquote
 from figures import create_line_chart
-from pathlib import Path
-import pandas as pd
 
 def title(he_provider=None):
     decoded_he_provider = unquote(he_provider)

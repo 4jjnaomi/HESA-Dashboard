@@ -1,8 +1,9 @@
+from urllib.parse import unquote
 import dash
 from dash import html, dcc, Dash, Input, Output
 import dash_bootstrap_components as dbc
 from figures import create_ranking_table, create_card, create_category_marker_options, create_line_chart
-from urllib.parse import unquote
+
 
 
 # Variable that contains the external_stylesheet to use, in this case Bootstrap styling from dash bootstrap
@@ -52,8 +53,8 @@ def update_table(class_name, academic_year):
 )
 def display_card(hover_data):
     if hover_data is not None:
-       ukprn = hover_data['points'][0]['customdata'][0]
-       if  ukprn is not None:
+        ukprn = hover_data['points'][0]['customdata'][0]
+        if  ukprn is not None:
             return create_card(ukprn)
            
 @app.callback(

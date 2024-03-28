@@ -1,10 +1,8 @@
 from pathlib import Path
 import pandas as pd
-import dash
 from dash import html, dash_table
 import dash_bootstrap_components as dbc
 import plotly.express as px
-import plotly.graph_objects as go
 
 def create_scatter_mapbox():
     hei_data = Path(__file__).parent.parent.joinpath('data','hei_data.csv')
