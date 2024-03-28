@@ -30,7 +30,7 @@ row_two = dbc.Row([
 ])
 
 row_three = dbc.Row([
-    dbc.Col(children=table, width=12)
+    dbc.Col(children=table, width=12, id="ranking-table-div", style={'width': '100%'})
 ])
 
 layout = dbc.Container([

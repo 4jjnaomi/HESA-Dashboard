@@ -41,8 +41,11 @@ row_one = dbc.Row([
     ])
 
 row_two = dbc.Row([
-    dbc.Col(children=[html.P(children=["Filter Regions", region_dropdown], style={"background-color": "lightgrey"}), html.P(["Filter HEIs", hei_dropdown], style={"background-color": "lightgrey"} )], width=3),
-    dbc.Col(children=[dcc.Graph(figure=map_fig, id='england_map')], width=9)
+    dbc.Col(children=[html.Br(),
+                      html.P(children=["Filter Regions", region_dropdown], style={"background-color": "lightgrey"}), 
+                      html.P(["Filter HEIs", hei_dropdown], style={"background-color": "lightgrey"} )], width=2),
+    dbc.Col(children=[dcc.Graph(figure=map_fig, id='england_map')], width=8),
+    dbc.Col(children=[html.Div(id='card')], width=2)
 ])
 
 

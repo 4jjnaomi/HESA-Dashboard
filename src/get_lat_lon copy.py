@@ -5,12 +5,9 @@ import time
 
 geolocator = Nominatim(user_agent="HeiEnvironmentalDashboard", timeout=10)
 
-raw_data = Path(__file__).parent.parent.joinpath('data', 'dataset_prepared.csv')
+raw_data = Path(__file__).parent.parent.joinpath('data', 'hei_data.csv')
 data_df = pd.read_csv(raw_data)
 
-new_df = data_df[['HE Provider', 'Region of HE provider']]
-#remove duplicate rows
-new_df = new_df.drop_duplicates()
 
 # Dictionary to map universities to their alternative names
 university_alternative_names = {
@@ -51,24 +48,23 @@ university_alternative_names = {
 }
 
 # Map university names to their alternative names and create a new column
-new_df['Alternative Name'] = new_df['HE Provider'].map(university_alternative_names).fillna(new_df['HE Provider'])
+data_df['Alternative Name'] = data_df['HE Provider'].map(university_alternative_names).fillna(data_df['HE Provider'])
 
 # Create an array of HEIs
-heis = new_df['Alternative Name']
+heis = data_df['Alternative Name']
 
 # Function to find the latitude and longitude of HEIs in England
 def get_lat_lon(heis1, data_df1):
     hei_array = heis1
     for i in hei_array:
-        print(i)
         retry_count = 0
         while retry_count < 3:  # Retry up to 3 times
             try:
                 # Geocode the HEI name within the bounding box of England
                 location = geolocator.geocode(i, country_codes='GB')
                 if location is not None:
-                    data_df1.loc[data_df1['Alternative Name'] == i, 'Latitude'] = location.latitude
-                    data_df1.loc[data_df1['Alternative Name'] == i, 'Longitude'] = location.longitude
+                    data_df1.loc[data_df1['Alternative Name'] == i, 'lat'] = location.latitude
+                    data_df1.loc[data_df1['Alternative Name'] == i, 'lon'] = location.longitude
                 break  # Break out of the retry loop if successful
             except Exception as e:
                 print(f"Error geocoding {i}: {e}")
@@ -76,13 +72,13 @@ def get_lat_lon(heis1, data_df1):
                 time.sleep(2)  # Wait for 2 seconds before retrying
     return data_df1
 
-new_df = get_lat_lon(heis, new_df)
+new_df = get_lat_lon(heis, data_df)
 
 #Save the dataframe to a csv file
-new_df.to_csv(Path(__file__).parent.parent.joinpath('data','dataset_prepared_lat_lon.csv'), index=False)
+new_df.to_csv(Path(__file__).parent.parent.joinpath('data','hei_data.csv'), index=False)
 print('Latitude and Longitude added to the dataset')
 
 
 #find rows where the he provider are different but lat and lon are the same
-duplicate = new_df[new_df.duplicated(subset=['Latitude', 'Longitude'], keep=False)]
+duplicate = new_df[new_df.duplicated(subset=['lat', 'lon'], keep=False)]
 print(duplicate)

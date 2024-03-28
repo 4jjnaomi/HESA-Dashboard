@@ -1,6 +1,7 @@
 import dash
-from dash import html, dcc, Dash
+from dash import html, dcc, Dash, Input, Output
 import dash_bootstrap_components as dbc
+from figures import create_ranking_table, create_card
 
 # Variable that contains the external_stylesheet to use, in this case Bootstrap styling from dash bootstrap
 # components (dbc)
@@ -33,6 +34,25 @@ app.layout = html.Div([
     # Area where the page content is displayed
     dash.page_container
 ])
+
+@app.callback(
+    Output('ranking-table-div', 'children'),
+    Input('class-dropdown', 'value'),
+    Input('year-dropdown', 'value')
+)
+def update_table(class_name, academic_year):
+    return create_ranking_table(class_name, academic_year)
+
+@app.callback(
+    Output('card', 'children'),
+    Input('england_map', 'hoverData')
+)
+def display_card(hover_data):
+    if hover_data is not None:
+       ukprn = hover_data['points'][0]['customdata'][0]
+       if  ukprn is not None:
+            return create_card(ukprn)
+           
 
 if __name__ == '__main__':
     app.run(debug=True, port=8051)
