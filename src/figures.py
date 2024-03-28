@@ -104,3 +104,22 @@ def create_card(ukprn):
     )
 
     return card
+
+#Create a line chart where a user can select a HEI and also select a Category marker and then see the trend of all the categories within that Category marker over the years
+def create_line_chart(hei, category_marker):
+    # Load the dataset
+    data_path = Path(__file__).parent.parent.joinpath('data','entry_data.csv')
+    data_df = pd.read_csv(data_path)
+    cols = ['HE Provider', 'Academic Year', 'Class', 'Category', 'Value']
+    data_df = data_df[cols]
+
+    # Filter the DataFrame by 'HE Provider' and 'Category'
+    data_df = data_df[(data_df['HE Provider'] == hei) & (data_df['Category marker'] == category_marker)]
+
+    # Convert 'Value' column to numeric, ignoring errors
+    data_df['Value'] = pd.to_numeric(data_df['Value'], errors='coerce')
+
+    # Create a line chart
+    fig = px.line(data_df, x='Academic Year', y='Value', color='Category',  title=f'Trend of {category_marker} categories for {hei}', markers=True)
+
+    return fig
