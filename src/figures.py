@@ -120,7 +120,7 @@ def create_line_chart(hei=None, Class=None, category_marker=None):
     data_df = data_df.sort_values(by='Academic Year')
 
     # Create a line chart
-    fig = px.line(data_df, x='Academic Year', y='Value', color='Category', markers=True)
+    fig = px.line(data_df, x='Academic Year', y='Value', color='Category', markers=True, color_discrete_sequence=px.colors.qualitative.Set3)
 
     if category_marker != None:
         fig.update_layout(title=f"Trend of '{category_marker}' categories:")
@@ -170,7 +170,7 @@ def create_bar_chart(hei=None, year=None, category=None):
     unique_years = sorted(data_df['Academic Year'].unique())
 
     # Assign a unique color to each year
-    color_scale = px.colors.qualitative.Set1[:len(unique_years)]
+    color_scale = px.colors.qualitative.Set3[:len(unique_years)]
 
     #Ensure each row is unique
     data_df = data_df.drop_duplicates()
