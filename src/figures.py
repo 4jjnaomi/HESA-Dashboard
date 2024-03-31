@@ -87,7 +87,9 @@ def create_card(ukprn):
     # Create a card to display the HEI name, Region and UKPRN number
     card = dbc.Card(
         [
-            dbc.CardHeader(html.H4(he_name, className='card-title')),
+            dbc.CardHeader(html.A(
+                html.H4(he_name, className='card-title'), href=f"/university/{he_name}")
+                ),
             dbc.CardBody(
                 [
                     html.H6(f"Region: {region}", className='card-subtitle'),
@@ -133,3 +135,54 @@ def create_category_marker_options(class_name):
     category_markers = data_df['Category marker'].unique()
     options = [category_marker for category_marker in category_markers]
     return options
+
+def create_category_options(category_marker):
+    # Load the dataset
+    data_path = Path(__file__).parent.parent.joinpath('data','entry_data.csv')
+    data_df = pd.read_csv(data_path)
+    data_df = data_df[(data_df['Category marker'] == category_marker)]
+    categories = data_df['Category'].unique()
+    options = [category for category in categories]
+    return options
+
+#Create a bar chart where a user can select one or more hei(s) and also select a year and they can see the value of the category they've selected
+def create_bar_chart(hei=None, year=None, category=None):
+    # Load the dataset
+    data_path = Path(__file__).parent.parent.joinpath('data', 'entry_data.csv')
+    data_df = pd.read_csv(data_path)
+    cols = ['Academic Year', 'HE Provider', 'Category marker', 'Category', 'Value']
+    data_df = data_df[cols]
+
+    # Filter the DataFrame by 'Academic Year' and 'Category'
+    if year:
+        data_df = data_df[data_df['Academic Year'].isin(year)]
+    if category:
+        data_df = data_df[data_df['Category'] == category]
+
+    # Filter the DataFrame by 'HE Provider'
+    if hei:
+        data_df = data_df[data_df['HE Provider'].isin(hei)]
+
+    # Convert 'Value' column to numeric, ignoring errors
+    data_df['Value'] = pd.to_numeric(data_df['Value'], errors='coerce')
+
+    # Create a list of unique years
+    unique_years = sorted(data_df['Academic Year'].unique())
+
+    # Assign a unique color to each year
+    color_scale = px.colors.qualitative.Set1[:len(unique_years)]
+
+    #Ensure each row is unique
+    data_df = data_df.drop_duplicates()
+
+    # Create a bar chart
+    fig = px.bar(data_df, x='HE Provider', y='Value', color='Academic Year', barmode='group', color_discrete_sequence=color_scale)
+
+    category_marker = data_df['Category marker'].unique()
+    category_marker = category_marker[0]
+
+    if category is not None:
+        title = f"{category_marker}: {category}"
+        fig.update_layout(title_text=title)
+
+    return fig

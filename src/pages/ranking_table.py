@@ -7,13 +7,13 @@ from figures import create_ranking_table
 register_page(__name__, name="Ranking Table", path='/ranking_table')
 
 class_dropdown = dbc.Select(
-    id="class-dropdown",  # id uniquely identifies the element, will be needed later
+    id="class-dropdown-rank",  # id uniquely identifies the element, will be needed later
     options=["Building and spaces", "Energy", "Emissions and waste", "Transport and environment", "Finances and people"],
     value="Building and spaces"
 )
 
 year_dropdown = dbc.Select(
-    id="year-dropdown",
+    id="year-dropdown-rank",
     options=[ "2018/19", "2019/20", "2020/21", "2021/22"],  
     value="2021/22"
 )
@@ -41,8 +41,8 @@ layout = dbc.Container([
 
 @callback(
     Output('ranking-table-div', 'children'),
-    Input('class-dropdown', 'value'),
-    Input('year-dropdown', 'value')
+    Input('class-dropdown-rank', 'value'),
+    Input('year-dropdown-rank', 'value')
 )
 def update_table(class_name, academic_year):
     return create_ranking_table(class_name, academic_year)

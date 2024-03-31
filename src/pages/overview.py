@@ -153,7 +153,7 @@ def update_sidebar(search_value):
     Input('class-dropdown', 'value')
 )
 
-def update_category_dropdown(class_name):
+def update_category_marker_dropdown_overview(class_name):
     if not class_name:
         raise PreventUpdate
 

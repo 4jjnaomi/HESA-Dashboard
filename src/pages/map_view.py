@@ -22,14 +22,14 @@ regions = data_df['Region of HE provider'].unique()
 heis = data_df['HE Provider'].unique()
 
 region_dropdown = dcc.Dropdown(
-    id="region-dropdown",
+    id="region-dropdown-map",
     options=regions,
     placeholder="Select Region(s)",
     multi=True
 )
 
 hei_dropdown = dcc.Dropdown(
-    id="hei-dropdown",
+    id="hei-dropdown-map",
     options=heis,
     placeholder="Select HEI(s)",
     multi=True,
