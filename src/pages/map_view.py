@@ -1,8 +1,9 @@
-from dash import html, register_page, dcc
-import dash_bootstrap_components as dbc
 from pathlib import Path
+
+from dash import html, register_page, dcc, callback, Output, Input
+import dash_bootstrap_components as dbc
 import pandas as pd
-from figures import create_scatter_mapbox
+from figures import create_scatter_mapbox, create_card
 
 
 # Register the page with the Dash app
@@ -52,4 +53,14 @@ row_two = dbc.Row([
 layout =  dbc.Container([
     row_one,
     row_two
-])  
+]) 
+
+@callback(
+    Output('card', 'children'),
+    Input('england_map', 'hoverData')
+)
+def display_card(hover_data):
+    if hover_data is not None:
+        ukprn = hover_data['points'][0]['customdata'][0]
+        if  ukprn is not None:
+            return create_card(ukprn)

@@ -1,4 +1,4 @@
-from dash import html, register_page
+from dash import html, register_page, callback, Output, Input
 import dash_bootstrap_components as dbc
 from figures import create_ranking_table
 
@@ -38,3 +38,11 @@ layout = dbc.Container([
     row_two,
     row_three
 ])
+
+@callback(
+    Output('ranking-table-div', 'children'),
+    Input('class-dropdown', 'value'),
+    Input('year-dropdown', 'value')
+)
+def update_table(class_name, academic_year):
+    return create_ranking_table(class_name, academic_year)

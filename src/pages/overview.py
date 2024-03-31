@@ -1,13 +1,69 @@
-from dash import html, register_page, dcc
-import dash_bootstrap_components as dbc
 from urllib.parse import unquote
-from figures import create_line_chart
+from pathlib import Path
+
+from dash import html, register_page, dcc, callback, Output, Input, State
+import dash_bootstrap_components as dbc
+import pandas as pd
+from figures import create_line_chart, create_category_marker_options
+from dash.exceptions import PreventUpdate
 
 def title(he_provider=None):
     decoded_he_provider = unquote(he_provider)
     return f"{decoded_he_provider}"
 
 register_page(__name__, path_template="/university/<he_provider>", title=title)
+
+def generate_sidebar_links():
+    data = Path(__file__).parent.parent.parent.joinpath('data','hei_data.csv')
+    df = pd.read_csv(data)
+    universities = df['HE Provider']
+    sidebar_links = []
+    for uni in universities:
+        sidebar_links.append(
+            {"children": uni, 
+             "href": f"/university/{uni}", 
+             "active": "exact"}
+        )
+    return sidebar_links
+
+def sidebar():
+    sidebar_links = generate_sidebar_links()
+
+    # Create list of dbc.NavLink components
+    nav_links = [
+        dbc.NavLink(
+            link["children"],
+            href=link["href"],
+            active=link["active"]
+        )
+        for link in sidebar_links
+    ]
+
+    collapse = dbc.Collapse(
+        dbc.Nav(nav_links, vertical=True),
+        id="collapse"
+    )
+
+    toggle_button = dbc.Button(
+        "Toggle Sidebar", 
+        id="toggle", 
+        className="mb-3", 
+        color="primary"
+    )
+
+    search_bar = dbc.Input(
+        id = "search_input",
+        type="search",
+        placeholder="Search for a university",
+        className="mb-3"
+    )
+
+    sidebar_layout = dbc.Nav(
+        [search_bar, toggle_button, collapse],
+        vertical=True,
+    )
+
+    return sidebar_layout
 
 #Create a dropdown for the class
 class_dropdown = dbc.Select(
@@ -37,4 +93,84 @@ def layout(he_provider=None):
     row_three = dbc.Row([
         dbc.Col(children=[dcc.Graph(figure=line_chart, id='overview_line_chart')], width=12)
     ])
-    return row_one, row_two, row_three
+    page_layout = dbc.Container([
+        dbc.Row([
+            dbc.Col(sidebar(), width=2),
+            dbc.Col([
+                row_one,
+                row_two,
+                row_three
+            ], width=10)
+        ])
+    ])
+    return page_layout
+
+@callback(
+    Output("collapse", "is_open"),
+    [Input("toggle", "n_clicks")],
+    [State("collapse", "is_open")],
+)
+def toggle_collapse(n, is_open):
+    if n:
+        return not is_open
+    return is_open
+
+@callback(
+    Output("collapse", "children"),
+    [Input("search_input", "value")]
+)
+
+def update_sidebar(search_value):
+    universities = generate_sidebar_links()
+    
+    if not search_value:
+        nav_links = [
+            dbc.NavLink(
+                uni["children"],
+                href=uni["href"],
+                active=uni["active"]
+            )
+            for uni in universities
+        ]
+        return nav_links
+    
+    filtered_universities = [uni for uni in universities if search_value.lower() in uni["children"].lower()]
+    
+    nav_links = [
+        dbc.NavLink(
+            uni["children"],
+            href=uni["href"],
+            active=uni["active"]
+        )
+        for uni in filtered_universities
+    ]
+    
+    return nav_links
+
+@callback(
+    Output('category-marker-dropdown', 'options'),
+    Output('category-marker-dropdown', 'value'),
+    Input('class-dropdown', 'value')
+)
+
+def update_category_dropdown(class_name):
+    if not class_name:
+        raise PreventUpdate
+
+    options = create_category_marker_options(class_name)
+    return options, None
+
+@callback(
+    Output('overview_line_chart', 'figure'),
+    Input('class-dropdown', 'value'),
+    Input('category-marker-dropdown', 'value'),
+    Input('url', 'pathname')
+)
+
+def update_line_chart(class_name, category_marker, pathname):
+    if not class_name:
+        raise PreventUpdate
+    
+    hei_name = pathname.split('/')[-1]
+    decoded_he_provider = unquote(hei_name)
+    return create_line_chart(decoded_he_provider, class_name, category_marker)
