@@ -5,24 +5,52 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 
 def create_scatter_mapbox():
-    hei_data = Path(__file__).parent.parent.joinpath('data','hei_data.csv')
-    cols = ['UKPRN','HE Provider', 'lat', 'lon']
+    hei_data = Path(__file__).parent.parent.joinpath('data', 'hei_data.csv')
+    cols = ['UKPRN', 'HE Provider', 'Region of HE provider', 'lat', 'lon']
     df_loc = pd.read_csv(hei_data, usecols=cols)
-    df_loc['MarkerSize'] = 0.5
-    fig = px.scatter_mapbox(df_loc, 
-                            lat="lat", 
-                            lon="lon", 
-                            hover_name="HE Provider", 
-                            zoom=5,
-                            center={"lat": 52.3555, "lon": -1.1743},  # Approx center of England
-                            mapbox_style="carto-positron",
-                            color_continuous_scale='False',
-                            height=600,
-                            color_discrete_sequence=["#77dd77"],
-                            opacity=0.8,
-                            custom_data='UKPRN'
-                            )
-   
+
+    # Define a color scale using px.colors.qualitative.Set3
+    color_scale = px.colors.qualitative.Set3
+
+    df_loc['MarkerSize'] = 5
+
+    fig = px.scatter_geo(
+        df_loc,
+        lat="lat",
+        lon="lon",
+        color="Region of HE provider",
+        hover_name="HE Provider",
+        hover_data={"Region of HE provider": False, "lat": False, "lon": False, 'MarkerSize': False},
+        custom_data=["UKPRN"],
+        opacity=0.8,
+        color_continuous_scale=color_scale,
+        projection="mercator",
+        width=800,
+        height=800,
+        size = 'MarkerSize'
+    )
+
+    fig.update_geos(
+        resolution=50,
+        showland=True,
+        landcolor='rgb(220, 220, 220)'
+    )
+
+    fig.update_layout(
+        title='HE Providers by Region',
+        geo=dict(
+            fitbounds="locations",
+            showcoastlines=True,  # Show coastlines
+            showland=True,  # Show land
+            showcountries=True,  # Show country borders
+            countrycolor="black",  # Border color for countries
+            showrivers=True,  # Show rivers
+            rivercolor="blue",  # River color
+            showlakes=True,  # Show lakes
+            lakecolor="rgb(0, 255, 255)",  # Lake color
+        )
+    )
+
     return fig
 
 def create_ranking_table(ClassName, AcademicYear):

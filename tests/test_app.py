@@ -2,8 +2,9 @@ import time
 import requests
 import pytest
 from dash.testing.application_runners import import_app
+from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 
 def test_server_live(dash_duo):
@@ -26,12 +27,12 @@ def test_server_live(dash_duo):
     url = dash_duo.driver.current_url
 
     #Make a HTTP request to the home page
-    response = requests.get(url)
+    response = requests.get(url, timeout=5)
 
     # Assert the server responds with a 200 status code
     assert response.status_code == 200
 
-@pytest.mark.parametrize("link_index, expected_url", [(1, '/map_view'), (2, '/ranking_table')])
+@pytest.mark.parametrize("link_index, expected_url", [(0,'/'), (1, '/map_view'), (2, '/ranking_table')])
 def test_navbar_links(dash_duo, link_index, expected_url):
     """
     GIVEN the Dash app is running
@@ -86,3 +87,198 @@ def test_404_page(dash_duo):
 
     # Assert that the h1 element contains the expected text
     assert "404 - Page not found" in h1_text
+
+def test_homepage_content(dash_duo):
+    """
+    GIVEN the Dash app is running
+    WHEN a user navigates to the home page
+    THEN the app should display the home page content
+    """
+
+    # Get the Dash app
+    app = import_app(app_file='app')
+
+    # Start the Dash app
+    dash_duo.start_server(app)
+
+    # Navigate to the home page
+    dash_duo.driver.get(dash_duo.server_url + '/')
+
+    # Wait for the page to load
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.visibility_of_element_located((By.TAG_NAME, "div"))
+    )
+
+    #Wait some more seconds
+    time.sleep(5)
+
+    # Get the text of the div element
+    div_text = dash_duo.driver.find_element(By.TAG_NAME, "div").text
+
+    # Assert that the div element contains the expected text
+    assert "Home page to come soon!" in div_text
+
+def test_ranking_table_layout(dash_duo):
+    """
+    GIVEN the Dash app is running
+    WHEN the user navigates to the ranking table page
+    THEN the layout should contain the expected components
+    """
+
+    # Get the Dash app
+    app = import_app(app_file='app')
+
+    # Start the Dash app
+    dash_duo.start_server(app)
+
+    # Navigate to the ranking table page
+    dash_duo.driver.get(dash_duo.server_url + '/ranking_table')
+
+    # Wait for the table to load
+    WebDriverWait(dash_duo.driver, 10).until(
+        EC.presence_of_element_located((By.ID, "ranking-table"))
+    )
+
+    # Get the layout elements
+    class_dropdown = dash_duo.find_element("#class-dropdown-rank")
+    year_dropdown = dash_duo.find_element("#year-dropdown-rank")
+    table_div = dash_duo.find_element("#ranking-table")
+
+    # Assert that the layout contains the expected components
+    assert class_dropdown.is_displayed()
+    assert year_dropdown.is_displayed()
+    assert table_div.is_displayed()
+
+def test_ranking_table_callback(dash_duo):
+    """
+    GIVEN the Dash app is running
+    WHEN the user selects options in the dropdowns
+    THEN the table should update accordingly
+    """
+
+    # Get the Dash app
+    app = import_app(app_file='app')
+
+    # Start the Dash app
+    dash_duo.start_server(app)
+
+    # Navigate to the ranking table page
+    dash_duo.driver.get(dash_duo.server_url + '/ranking_table')
+
+    # Wait for the table to load
+    WebDriverWait(dash_duo.driver, 10).until(
+        EC.presence_of_element_located((By.ID, "ranking-table"))
+    )
+
+    # Get the initial table content
+    initial_table_content = dash_duo.find_element("#ranking-table").text
+
+    # Find the class dropdown element
+    class_dropdown_element = dash_duo.driver.find_element(By.ID, "class-dropdown-rank")
+    
+    # Initialize Select object for the class dropdown
+    class_dropdown = Select(class_dropdown_element)
+
+    # Select the option with value "Finances and people"
+    class_dropdown.select_by_value("Finances and people")
+
+    # Wait for the table content to change
+    WebDriverWait(dash_duo.driver, 10).until(
+        lambda driver: dash_duo.find_element("#ranking-table").text != initial_table_content
+    )
+
+    # Get the updated table content
+    updated_table_content = dash_duo.find_element("#ranking-table").text
+
+    # Assert that the table content has been updated
+    assert updated_table_content != initial_table_content
+
+def test_map_view_layout(dash_duo):
+    """
+    GIVEN the Dash app is running
+    WHEN the user navigates to the map view page
+    THEN the layout should contain the expected components
+    """
+
+    # Get the Dash app
+    app = import_app(app_file='app')
+
+    # Start the Dash app
+    dash_duo.start_server(app)
+
+    # Navigate to the map view page
+    dash_duo.driver.get(dash_duo.server_url + '/map_view')
+
+    # Wait for the map to load
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "mapboxgl-map"))
+    )
+
+    # Get the layout elements
+    region_dropdown = dash_duo.driver.find_element(By.ID, "region-dropdown-map")
+    hei_dropdown = dash_duo.driver.find_element(By.ID, "hei-dropdown-map")
+    map_div = dash_duo.driver.find_element(By.CLASS_NAME, "mapboxgl-map")
+    card_div = dash_duo.driver.find_element(By.ID, "card")
+
+    # Assert that the layout contains the expected components
+    assert region_dropdown.is_displayed()
+    assert hei_dropdown.is_displayed()
+    assert map_div.is_displayed()
+    assert not card_div.is_displayed()
+
+def test_map_marker_select_updates_card(dash_duo):
+    """
+    GIVEN the app is running which has a <div id='map>
+    THEN there should not be any elements with a class of 'card' one the page
+    WHEN a marker in the map is selected
+    THEN there should be one more card on the page then there was at the start
+    AND there should be a text value for the h6 heading in the card
+    """
+    
+    # Get the Dash app
+    app = import_app(app_file='app')
+
+    # Start the Dash app
+    dash_duo.start_server(app)
+
+    # Navigate to the map view page
+    dash_duo.driver.get(dash_duo.server_url + '/map_view')
+
+    # Wait for the map to load
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "geolayer"))
+    )
+
+    # Get the initial number of cards
+    initial_num_cards = len(dash_duo.driver.find_elements(By.CLASS_NAME, "card-body"))
+
+    # Get the map element
+    map_element = dash_duo.driver.find_element(By.CLASS_NAME, "geolayer")
+
+    # Get the first marker on the map
+    css_selector = '#england_map > div.js-plotly-plot > div > div > svg:nth-child(1) > g.geolayer > g > g.layer.frontplot > g > g:nth-child(1) > path:nth-child(1)'
+    marker = map_element.find_element(By.CSS_SELECTOR, css_selector)
+
+    #Use ActionChains to click on the marker
+    ActionChains(dash_duo.driver).move_to_element(marker).pause(2).perform()
+
+    # Wait for the card to appear
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "card-body"))
+    )
+
+    # Get the updated number of cards
+    updated_num_cards = len(dash_duo.driver.find_elements(By.CLASS_NAME, "card-body"))
+
+    # Get the text of the h6 element in the card
+    card_text = dash_duo.driver.find_element(By.ID, "card").find_element(By.TAG_NAME, "h6").text
+
+    # Assert that the number of cards has increased by 1
+    assert updated_num_cards == (initial_num_cards + 1)
+
+    # Assert that the card text is not empty
+    assert card_text != ""
+
+
+
+    
