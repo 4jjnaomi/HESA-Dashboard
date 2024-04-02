@@ -211,13 +211,13 @@ def test_map_view_layout(dash_duo):
 
     # Wait for the map to load
     WebDriverWait(dash_duo.driver, 30).until(
-        EC.presence_of_element_located((By.CLASS_NAME, "mapboxgl-map"))
+        EC.presence_of_element_located((By.CLASS_NAME, "geolayer"))
     )
 
     # Get the layout elements
     region_dropdown = dash_duo.driver.find_element(By.ID, "region-dropdown-map")
     hei_dropdown = dash_duo.driver.find_element(By.ID, "hei-dropdown-map")
-    map_div = dash_duo.driver.find_element(By.CLASS_NAME, "mapboxgl-map")
+    map_div = dash_duo.driver.find_element(By.CLASS_NAME, "geolayer")
     card_div = dash_duo.driver.find_element(By.ID, "card")
 
     # Assert that the layout contains the expected components
@@ -279,6 +279,193 @@ def test_map_marker_select_updates_card(dash_duo):
     # Assert that the card text is not empty
     assert card_text != ""
 
-
-
+def test_map_card_link_opens(dash_duo):
+    """
+    GIVEN the app is running which has a <div id='map>
+    WHEN a marker in the map is selected
+    THEN there should be a card on the page
+    AND the card should contain a link
+    WHEN the link is clicked
+    THEN the page should navigate to the university overview page
+    """
     
+    # Get the Dash app
+    app = import_app(app_file='app')
+
+    # Start the Dash app
+    dash_duo.start_server(app)
+
+    # Navigate to the map view page
+    dash_duo.driver.get(dash_duo.server_url + '/map_view')
+
+    # Wait for the map to load
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "geolayer"))
+    )
+
+    # Get the map element
+    map_element = dash_duo.driver.find_element(By.CLASS_NAME, "geolayer")
+
+    # Get the first marker on the map
+    css_selector = '#england_map > div.js-plotly-plot > div > div > svg:nth-child(1) > g.geolayer > g > g.layer.frontplot > g > g:nth-child(1) > path:nth-child(1)'
+    marker = map_element.find_element(By.CSS_SELECTOR, css_selector)
+
+    #Use ActionChains to click on the marker
+    ActionChains(dash_duo.driver).move_to_element(marker).pause(2).perform()
+
+    # Wait for the card to appear
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "card"))
+    )
+
+    # Get the card element
+    card = dash_duo.driver.find_element(By.CLASS_NAME, "card")
+
+    # Get the header in the card which is a link
+    link = card.find_element(By.TAG_NAME, "H4")
+
+    # Click on the link
+    link.click()
+
+    # Wait for the page to load
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.url_contains('/university/')
+    )
+
+    # Assert that the URL has changed to the university overview page
+    assert '/university/' in dash_duo.driver.current_url
+
+
+def test_comparison_page_layout(dash_duo):
+    """
+    GIVEN the Dash app is running
+    WHEN the user navigates to the comparison page
+    THEN the layout should contain the expected components
+    """
+
+    # Get the Dash app
+    app = import_app(app_file='app')
+
+    # Start the Dash app
+    dash_duo.start_server(app)
+
+    # Navigate to the comparison page
+    dash_duo.driver.get(dash_duo.server_url + '/comparison')
+
+    # Wait for the page to load
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.presence_of_element_located((By.ID, "bar_chart"))
+    )
+
+    # Get the layout elements
+    year_dropdown = dash_duo.driver.find_element(By.ID, "year-dropdown-comparison")
+    class_dropdown = dash_duo.driver.find_element(By.ID, "class-dropdown-comparison")
+    category_marker_dropdown = dash_duo.driver.find_element(By.ID, "category-marker-dropdown-comparison")
+    category_dropdown = dash_duo.driver.find_element(By.ID, "category-dropdown-comparison")
+    hei_dropdown = dash_duo.driver.find_element(By.ID, "hei-dropdown-comparison")
+
+    # Assert that the layout contains the expected components
+    assert year_dropdown.is_displayed()
+    assert class_dropdown.is_displayed()
+    assert category_marker_dropdown.is_displayed()
+    assert category_dropdown.is_displayed()
+    assert hei_dropdown.is_displayed()
+
+def test_comparison_page_callback(dash_duo):
+    """
+    GIVEN the Dash app is running
+    WHEN the user selects options in the dropdowns
+    THEN the bar chart should update accordingly
+    """
+
+    # Get the Dash app
+    app = import_app(app_file='app')
+
+    # Start the Dash app
+    dash_duo.start_server(app)
+
+    # Navigate to the comparison page
+    dash_duo.driver.get(dash_duo.server_url + '/comparison')
+
+    # Wait for the page to load
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.presence_of_element_located((By.ID, "bar_chart"))
+    )
+
+    #Get the category marker dropdown element
+    category_marker_dropdown_element = dash_duo.driver.find_element(By.ID, "category-marker-dropdown-comparison")
+
+    # Initialize Select object for the category marker dropdown
+    category_marker_dropdown = Select(category_marker_dropdown_element)
+
+    # Select the option with value "Grounds area"
+    category_marker_dropdown.select_by_value("Grounds area")
+
+    #Get the category dropdown element
+    category_dropdown_element = dash_duo.driver.find_element(By.ID, "category-dropdown-comparison")
+
+    # Initialize Select object for the category dropdown
+    category_dropdown = Select(category_dropdown_element)
+
+    # Select the option with value "Water (hectares)"
+    category_dropdown.select_by_value("Water (hectares)")
+
+    #Click the HEI dropdown element
+    hei_dropdown_element = dash_duo.driver.find_element(By.ID, "hei-dropdown-comparison")
+    hei_dropdown_element.click()
+
+    #Find the hei dropdown menu
+    hei_dropdown_menu = dash_duo.driver.find_element(By.CLASS_NAME, "Select-menu-outer")
+    #Click the first option in the dropdown
+    ActionChains(dash_duo.driver).click(hei_dropdown_menu).perform()
+
+    time.sleep(3)
+
+    # Get the initial bar chart content
+    initial_bar_chart_content = dash_duo.find_element("#bar_chart").text
+
+    #Enter another option in the HEI dropdown
+    hei_dropdown_element.click()
+    hei_dropdown_menu = dash_duo.driver.find_element(By.CLASS_NAME, "Select-menu-outer")
+    ActionChains(dash_duo.driver).click(hei_dropdown_menu).perform()
+
+    time.sleep(2)
+
+    # Get the updated bar chart content
+    updated_bar_chart_content = dash_duo.find_element("#bar_chart").text
+
+    # Assert that the bar chart content has been updated
+    assert updated_bar_chart_content != initial_bar_chart_content
+
+def test_overview_page_layout(dash_duo):
+    """
+    GIVEN the Dash app is running
+    WHEN the user navigates to the overview page
+    THEN the layout should contain the expected components
+    """
+
+    # Get the Dash app
+    app = import_app(app_file='app')
+
+    # Start the Dash app
+    dash_duo.start_server(app)
+
+    # Navigate to the overview page
+    dash_duo.driver.get(dash_duo.server_url + '/university/ University College London')
+
+    # Wait for the page to load
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.presence_of_element_located((By.ID, "overview_line_chart"))
+    )
+
+    # Get the layout elements
+    class_dropdown = dash_duo.driver.find_element(By.ID, "class-dropdown")
+    category_marker_dropdown = dash_duo.driver.find_element(By.ID, "category-marker-dropdown")
+    search_bar = dash_duo.driver.find_element(By.ID, "search_input")
+    toggle_button = dash_duo.driver.find_element(By.ID, "toggle")
+
+    # Assert that the layout contains the expected components
+    assert class_dropdown.is_displayed()
+    assert category_marker_dropdown.is_displayed()
+    assert search_bar.is_displayed()
+    assert toggle_button.is_displayed()

@@ -53,17 +53,31 @@ row_one = dbc.Row([
 ])
 
 row_two = dbc.Row([
+    dbc.Col([html.P("To see a bar chart, you need to select a category marker and then select a category. You will then need to choose one or more HEIs to see how they perform in that category metric. You can also change the year or select more than one year.")], width=12)
+])
+
+row_three = dbc.Row([
     dbc.Col(children = [html.P(children=["Year", year_dropdown]),
                         html.P(children=["Class", class_dropdown]),
                         html.P(children=["Category Marker", category_marker_dropdown]),
                         html.P(children=["Category", category_dropdown]),
                         html.P(children=["HEI", hei_dropdown])], width=4),
-    dbc.Col(children = [dcc.Graph(id='bar_chart')], width=8)
+    dbc.Col(children = [dcc.Graph(id='bar_chart')], width=8),
+    html.Script('''
+        // Get the dropdown menu element
+        var dropdownMenu = document.getElementById('Select-menu-outer');
+
+        // Add an event listener to the dropdown menu to stop propagation of click events
+        dropdownMenu.addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
+    ''')
 ])
 
 layout = dbc.Container([
     row_one,
-    row_two
+    row_two,
+    row_three
 ])
 
 @callback(
