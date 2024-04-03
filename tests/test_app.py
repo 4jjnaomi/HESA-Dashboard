@@ -629,3 +629,30 @@ def test_sidebar_link(dash_duo):
 
     # Assert that the URL has changed to the university overview page
     assert f'/university/{university_name}' in dash_duo.driver.current_url
+
+def test_non_existent_university_overview(dash_duo):
+    """
+    GIVEN the Dash app is running
+    WHEN the user goes to the overview page of a non-existent university
+    THEN the app should display a message that the university was not found
+    """
+    
+    # Get the Dash app
+    app = import_app(app_file='app')
+
+    # Start the Dash app
+    dash_duo.start_server(app)
+
+    # Navigate to the overview page of a non-existent university
+    dash_duo.driver.get(dash_duo.server_url + '/university/Non Existent University')
+
+    # Wait for the page to load
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.presence_of_element_located((By.TAG_NAME, "h1"))
+    )
+
+    # Get the text of the h1 element
+    h1_text = dash_duo.driver.find_element(By.TAG_NAME, "h1").text
+
+    # Assert that the h1 element contains the expected text
+    assert "University not found" in h1_text

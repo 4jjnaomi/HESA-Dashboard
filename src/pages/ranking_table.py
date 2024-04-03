@@ -31,19 +31,24 @@ row_one = dbc.Row([
     ])
 
 row_two = dbc.Row([
+    dbc.Col(children = [html.P("Use this page to see how universities have performed in various environmental categories between 2018/19 - 2021/22. "), html.P("You can filter by class, year and region. Scroll sideways to see more metrics. The table is interactive so you can search each column for specific values and also sort by ascending or descending order.")], width=12)
+])
+
+row_three = dbc.Row([
     dbc.Col([html.P(children=["Class", class_dropdown], style={"font-size": 20})], width=4),
     dbc.Col([html.P(children=["Year", year_dropdown], style={"font-size":20})], width=4),
     dbc.Col([html.P(children=["Region", region_dropdown], style={"font-size":20})], width=4)
 ])
 
-row_three = dbc.Row([
+row_four = dbc.Row([
     dbc.Col(children=table, width=12, id="ranking-table-div", style={'width': '100%'})
 ])
 
 layout = dbc.Container([
     row_one,
     row_two,
-    row_three
+    row_three,
+    row_four
 ])
 
 @callback(

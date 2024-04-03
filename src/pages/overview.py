@@ -86,6 +86,9 @@ line_chart = create_line_chart(None, None, None)
 
 def layout(he_provider=None):
     decoded_he_provider = unquote(he_provider)
+    data = Path(__file__).parent.parent.parent.joinpath('data','hei_data.csv')
+    df = pd.read_csv(data)
+    universities = df['HE Provider']   
     row_one = dbc.Row([
         dbc.Col([html.H1(f"{decoded_he_provider}")], width=12)
     ])
@@ -110,7 +113,21 @@ def layout(he_provider=None):
             ], width=10)
         ])
     ])
-    return page_layout
+    non_existent_uni_layout = dbc.Container([
+        dbc.Row([
+            dbc.Col(sidebar(), width=2),
+            dbc.Col([
+                html.H1("University not found"),
+                html.P("The university you are looking for does not exist in our database."),
+                html.P("Please edit the url to choose a different university or click on a university from the sidebar.")
+            ], width=10)
+        ])
+    ])
+    #Not traditional error handling
+    if decoded_he_provider not in universities.values:
+        return non_existent_uni_layout        
+    else:
+        return page_layout
 
 @callback(
     Output("collapse", "is_open"),

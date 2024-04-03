@@ -20,11 +20,28 @@ navbar = dbc.NavbarSimple(
         dbc.NavItem(dbc.NavLink("Ranking Table", href=dash.page_registry['pages.ranking_table']['path'])),
         dbc.NavItem(dbc.NavLink("HEI Comparison", href=dash.page_registry['pages.comparison']['path'])),
     ],
-    brand="UK HEI Environmental Dashboard",
+    brand="HEI Environmental Dashboard",
     brand_href="/",
     brand_style={"font-size": 40, "font-weight": "bold"},
     color="primary",
     dark=True,
+)
+
+footer = dbc.Container(
+    dbc.Row(
+        [dbc.Col(
+                html.Div([
+                    html.P("Data Source: HESA", style={"color": "white"}, className="my-0"),
+                    html.P([" Data file canonical link: ", html.A("https://www.hesa.ac.uk/data-and-analysis/estates/data.csv", href="https://www.hesa.ac.uk/data-and-analysis/estates/data.csv", style={"color": "white"})], style = { "color": "white"}, className="my-0"),
+                    html.P(" Data file license: Creative Commons Attribution 4.0 International Licence", style={"color": "white"}, className="my-0")
+                ]),
+                width=6
+            )
+        ],
+        justify="center"
+    ),
+    fluid=True,
+    style={"text-align": "center"}, className="bg-primary mt-3"
 )
 
 app.layout = html.Div([
@@ -32,6 +49,8 @@ app.layout = html.Div([
     navbar,
     # Area where the page content is displayed
     dash.page_container,
+    # Footer
+    footer,
     dcc.Location(id='url', refresh=True)
 ])
 

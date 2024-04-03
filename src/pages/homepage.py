@@ -55,7 +55,7 @@ hei_dropdown = dcc.Dropdown(
 )
 
 row_one = html.Div([
-    html.H1('Welcome to the UK HEI Environmental Dashboard')
+    html.H1('Welcome to the England HEI Environmental Dashboard')
 ])
 
 row_two = html.Div([
