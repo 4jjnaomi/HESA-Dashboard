@@ -180,3 +180,4 @@ def update_line_chart(class_name, category_marker, pathname):
     hei_name = pathname.split('/')[-1]
     decoded_he_provider = unquote(hei_name)
     return create_line_chart(decoded_he_provider, class_name, category_marker)
+

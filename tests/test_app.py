@@ -202,38 +202,37 @@ def test_ranking_table_callback(dash_duo):
 
 def test_map_marker_select_updates_card(dash_duo):
     """
-    GIVEN the app is running which has a <div id='map>
-    THEN there should not be any elements with a class of 'card' one the page
-    WHEN a marker in the map is selected
-    THEN there should be one more card on the page then there was at the start
+    GIVEN the app is running which has a <div id='map'>
+    THEN there should not be any elements with a class of 'card' on the page
+    WHEN a marker in the map is hovered over
+    THEN there should be one more card on the page than there was at the start
     AND there should be a text value for the h6 heading in the card
     """
-    
+
     # Get the Dash app
     app = import_app(app_file='app')
 
     # Start the Dash app
     dash_duo.start_server(app)
 
-
     # Wait for the map to load
     WebDriverWait(dash_duo.driver, 30).until(
-        EC.presence_of_element_located((By.CLASS_NAME, "geolayer"))
+        EC.presence_of_element_located((By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
     )
 
     # Get the initial number of cards
     initial_num_cards = len(dash_duo.driver.find_elements(By.CLASS_NAME, "card-body"))
 
-    # Get the map element
-    map_element = dash_duo.driver.find_element(By.CLASS_NAME, "geolayer")
+    # Find the target map element
+    map_element = dash_duo.driver.find_element(By.ID, "england_map")
 
-    # Get the first marker on the map
-    css_selector = '#england_map > div.js-plotly-plot > div > div > svg:nth-child(1) > g.geolayer > g > g.layer.frontplot > g > g:nth-child(1) > path:nth-child(1)'
-    marker = map_element.find_element(By.CSS_SELECTOR, css_selector)
-
-    #Use ActionChains to click on the marker
-    ActionChains(dash_duo.driver).move_to_element(marker).pause(2).perform()
-
+    # Use ActionChains to move to the center of the map element
+    ActionChains(dash_duo.driver).move_to_element(map_element).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0.).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
+    
     # Wait for the card to appear
     WebDriverWait(dash_duo.driver, 30).until(
         EC.presence_of_element_located((By.CLASS_NAME, "card-body"))
@@ -269,18 +268,18 @@ def test_map_card_link_opens(dash_duo):
 
     # Wait for the map to load
     WebDriverWait(dash_duo.driver, 30).until(
-        EC.presence_of_element_located((By.CLASS_NAME, "geolayer"))
+        EC.presence_of_element_located((By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
     )
 
-    # Get the map element
-    map_element = dash_duo.driver.find_element(By.CLASS_NAME, "geolayer")
+    # Find the target map element
+    map_element = dash_duo.driver.find_element(By.ID, "england_map")
 
-    # Get the first marker on the map
-    css_selector = '#england_map > div.js-plotly-plot > div > div > svg:nth-child(1) > g.geolayer > g > g.layer.frontplot > g > g:nth-child(1) > path:nth-child(1)'
-    marker = map_element.find_element(By.CSS_SELECTOR, css_selector)
-
-    #Use ActionChains to click on the marker
-    ActionChains(dash_duo.driver).move_to_element(marker).pause(2).perform()
+    # Use ActionChains to move to the center of the map element
+    ActionChains(dash_duo.driver).move_to_element(map_element).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0.).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
 
     # Wait for the card to appear
     WebDriverWait(dash_duo.driver, 30).until(

@@ -4,65 +4,83 @@ from dash import html, dash_table
 import dash_bootstrap_components as dbc
 import plotly.express as px
 from urllib.parse import quote
+import plotly.graph_objects as go
 
-def create_scatter_mapbox():
+def create_scatter_mapbox(region=None, hei=None):
     hei_data = Path(__file__).parent.parent.joinpath('data', 'hei_data.csv')
     cols = ['UKPRN', 'HE Provider', 'Region of HE provider', 'lat', 'lon']
     df_loc = pd.read_csv(hei_data, usecols=cols)
 
-    # Define a color scale using px.colors.qualitative.Set3
-    color_scale = px.colors.qualitative.Set3
+    if region:
+        df_loc = df_loc[df_loc['Region of HE provider'].isin(region)]
+    if hei:
+        df_loc = df_loc[df_loc['HE Provider'].isin(hei)]
 
-    df_loc['MarkerSize'] = 5
+    # Create a color scale based on regions
+    regions = df_loc['Region of HE provider'].unique()
+    colors = px.colors.qualitative.Set3[:len(regions)]
+    color_scale = {region: color for region, color in zip(regions, colors)}
 
-    fig = px.scatter_geo(
-        df_loc,
-        lat="lat",
-        lon="lon",
-        color="Region of HE provider",
-        hover_name="HE Provider",
-        hover_data={"Region of HE provider": False, "lat": False, "lon": False, 'MarkerSize': False},
-        custom_data=["UKPRN"],
-        opacity=0.8,
-        color_continuous_scale=color_scale,
-        projection="mercator",
-        width=800,
-        height=800,
-        size = 'MarkerSize'
-    )
+    fig = go.Figure()
 
-    fig.update_geos(
-        resolution=50,
-        showland=True,
-        landcolor='rgb(220, 220, 220)'
-    )
+    # Dictionary to track regions added to the legend
+    added_regions = {}
 
+    # Add markers for each location
+    for index, row in df_loc.iterrows():
+        # Unique identifier
+        region = row['Region of HE provider']
+        if region not in added_regions:  # Only add the region to the legend if it hasn't been added before
+            added_regions[region] = True
+            fig.add_trace(go.Scattermapbox(
+                lat=[row['lat']],
+                lon=[row['lon']],
+                mode='markers',
+                marker=dict(size=12, color=color_scale[region], opacity=0.7),  # Color based on region
+                text=row['HE Provider'],
+                hoverinfo='text',
+                name=region,  # Show legend for regions
+                customdata=[row['UKPRN']],  # Use UKPRN as additional marker data
+            ))
+        else:  # If the region has already been added, don't add it again to the legend
+            fig.add_trace(go.Scattermapbox(
+                lat=[row['lat']],
+                lon=[row['lon']],
+                mode='markers',
+                marker=dict(size=12, color=color_scale[region], opacity=0.7),  # Color based on region
+                text=row['HE Provider'],
+                hoverinfo='text',
+                showlegend=False,  # Don't add this trace to the legend
+                customdata=[row['UKPRN']],  # Use UKPRN as additional marker data
+            ))
+
+    # Configure map layout
     fig.update_layout(
-        title='HE Providers by Region',
-        geo=dict(
-            fitbounds="locations",
-            showcoastlines=True,  # Show coastlines
-            showland=True,  # Show land
-            showcountries=True,  # Show country borders
-            countrycolor="black",  # Border color for countries
-            showrivers=True,  # Show rivers
-            rivercolor="blue",  # River color
-            showlakes=True,  # Show lakes
-            lakecolor="rgb(0, 255, 255)",  # Lake color
-        )
+        mapbox_style="carto-positron",
+        mapbox_zoom=4.8,
+        mapbox_center={"lat": df_loc['lat'].mean(), "lon": df_loc['lon'].mean()},
+        margin={"r": 0, "t": 0, "l": 0, "b": 0},
+        width=800,
+        height=370,
+        legend_title_text='Region',  # Set legend title to 'Region'
+        showlegend=True  # Show legend
+        
     )
 
     return fig
 
-def create_ranking_table(ClassName, AcademicYear):
+def create_ranking_table(ClassName=None, acedemic_year=None,            selected_regions=None):
     # Load the dataset
     data_path = Path(__file__).parent.parent.joinpath('data','dataset_prepared.csv')
     data_df = pd.read_csv(data_path)
-    cols = ['HE Provider', 'Academic Year', 'Class', 'Category', 'Value']
+    cols = ['HE Provider','Region of HE provider', 'Academic Year', 'Class', 'Category', 'Value']
     data_df = data_df[cols]
 
     # Filter the DataFrame by 'Class' and 'Academic Year'
-    data_df = data_df[(data_df['Class'] == ClassName) & (data_df['Academic Year'] == AcademicYear)]
+    data_df = data_df[(data_df['Class'] == ClassName) & (data_df['Academic Year'] == acedemic_year)] 
+    
+    if selected_regions:
+        data_df = data_df[data_df['Region of HE provider'].isin(selected_regions)]
 
     # Convert 'Value' column to numeric, ignoring errors
     data_df['Value'] = pd.to_numeric(data_df['Value'], errors='coerce')

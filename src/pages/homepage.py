@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from dash import html, register_page, dcc, callback, Output, Input
+from dash import html, register_page, dcc, callback, Output, Input, callback_context
 import dash_bootstrap_components as dbc
 import pandas as pd
 from figures import create_scatter_mapbox, create_card
@@ -26,7 +26,7 @@ button3 = html.Div([
 className= "d-grid gap-2 mx-auto"
 )
 
-raw_data = Path(__file__).parent.parent.parent.joinpath('data','dataset_prepared.csv')
+raw_data = Path(__file__).parent.parent.parent.joinpath('data','hei_data.csv')
 data_df = pd.read_csv(raw_data)
 
 #Create map
@@ -70,7 +70,7 @@ row_three = dbc.Row([
 ])
 
 row_four = dbc.Row([
-    dbc.Col(children=[html.Br(),
+    dbc.Col(children=[html.P("The map shows the location of HEIs in England.  Hover over a point to see more information about the HEI.", style={"font-size": "14px"}),
                       html.P(children=["Filter Regions", region_dropdown], style={"background-color": "lightgrey"}), 
                       html.P(["Filter HEIs", hei_dropdown], style={"background-color": "lightgrey"} )], width=2),
     dbc.Col(children=[dcc.Graph(figure=map_fig, id='england_map')], width=8),
@@ -87,11 +87,41 @@ layout =  dbc.Container([
 ])
 
 @callback(
+    Output('hei-dropdown-map', 'options'),
+    Input('region-dropdown-map', 'value')
+)
+def update_hei_options(selected_regions):
+    if selected_regions:
+        # Filter HEIs based on selected regions
+        heis_in_selected_regions = data_df[data_df['Region of HE provider'].isin(selected_regions)]['HE Provider']
+        hei_options = [{'label': hei, 'value': hei} for hei in heis_in_selected_regions]
+    else:
+        # If no regions are selected, show all HEIs
+        hei_options = [{'label': hei, 'value': hei} for hei in heis]
+
+    return hei_options
+
+@callback(
+    Output('england_map', 'figure'),
+    [Input('region-dropdown-map', 'value'),
+     Input('hei-dropdown-map', 'value')]
+)
+def update_map(selected_regions, selected_heis):
+    ctx = callback_context
+    if ctx.triggered:
+        prop_id = ctx.triggered[0]['prop_id']
+        if prop_id == 'region-dropdown-map.value':
+            return create_scatter_mapbox(region=selected_regions)
+        elif prop_id == 'hei-dropdown-map.value':
+            return create_scatter_mapbox(hei=selected_heis)
+    return create_scatter_mapbox()  # default to showing all data
+
+@callback(
     Output('card', 'children'),
     Input('england_map', 'hoverData')
 )
 def display_card(hover_data):
     if hover_data is not None:
-        ukprn = hover_data['points'][0]['customdata'][0]
+        ukprn = hover_data['points'][0]['customdata']
         if  ukprn is not None:
             return create_card(ukprn)
