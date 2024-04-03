@@ -32,7 +32,7 @@ def test_server_live(dash_duo):
     # Assert the server responds with a 200 status code
     assert response.status_code == 200
 
-@pytest.mark.parametrize("link_index, expected_url", [(0,'/'), (1, '/map_view'), (2, '/ranking_table')])
+@pytest.mark.parametrize("link_index, expected_url", [(0,'/'), (1, '/ranking_table'), (2, '/comparison')])
 def test_navbar_links(dash_duo, link_index, expected_url):
     """
     GIVEN the Dash app is running
@@ -105,18 +105,24 @@ def test_homepage_content(dash_duo):
     dash_duo.driver.get(dash_duo.server_url + '/')
 
     # Wait for the page to load
+    # Wait for the map to load
     WebDriverWait(dash_duo.driver, 30).until(
-        EC.visibility_of_element_located((By.TAG_NAME, "div"))
+        EC.presence_of_element_located((By.CLASS_NAME, "geolayer"))
     )
 
-    #Wait some more seconds
-    time.sleep(5)
+    # Get the layout elements
+    heading = dash_duo.driver.find_element(By.TAG_NAME, "h1")
+    buttons = dash_duo.driver.find_elements(By.CLASS_NAME, "btn")
+    region_dropdown = dash_duo.driver.find_element(By.ID, "region-dropdown-map")
+    hei_dropdown = dash_duo.driver.find_element(By.ID, "hei-dropdown-map")
+    card_div = dash_duo.driver.find_element(By.ID, "card")
 
-    # Get the text of the div element
-    div_text = dash_duo.driver.find_element(By.TAG_NAME, "div").text
-
-    # Assert that the div element contains the expected text
-    assert "Home page to come soon!" in div_text
+    # Assert that the layout contains the expected components
+    assert heading.is_displayed()
+    assert len(buttons) == 3
+    assert region_dropdown.is_displayed()
+    assert hei_dropdown.is_displayed()
+    assert not card_div.is_displayed()
 
 def test_ranking_table_layout(dash_duo):
     """
@@ -193,36 +199,6 @@ def test_ranking_table_callback(dash_duo):
     # Assert that the table content has been updated
     assert updated_table_content != initial_table_content
 
-def test_map_view_layout(dash_duo):
-    """
-    GIVEN the Dash app is running
-    WHEN the user navigates to the map view page
-    THEN the layout should contain the expected components
-    """
-
-    # Get the Dash app
-    app = import_app(app_file='app')
-
-    # Start the Dash app
-    dash_duo.start_server(app)
-
-    # Navigate to the map view page
-    dash_duo.driver.get(dash_duo.server_url + '/map_view')
-
-    # Wait for the map to load
-    WebDriverWait(dash_duo.driver, 30).until(
-        EC.presence_of_element_located((By.CLASS_NAME, "geolayer"))
-    )
-
-    # Get the layout elements
-    region_dropdown = dash_duo.driver.find_element(By.ID, "region-dropdown-map")
-    hei_dropdown = dash_duo.driver.find_element(By.ID, "hei-dropdown-map")
-    card_div = dash_duo.driver.find_element(By.ID, "card")
-
-    # Assert that the layout contains the expected components
-    assert region_dropdown.is_displayed()
-    assert hei_dropdown.is_displayed()
-    assert not card_div.is_displayed()
 
 def test_map_marker_select_updates_card(dash_duo):
     """
@@ -239,8 +215,6 @@ def test_map_marker_select_updates_card(dash_duo):
     # Start the Dash app
     dash_duo.start_server(app)
 
-    # Navigate to the map view page
-    dash_duo.driver.get(dash_duo.server_url + '/map_view')
 
     # Wait for the map to load
     WebDriverWait(dash_duo.driver, 30).until(
@@ -292,9 +266,6 @@ def test_map_card_link_opens(dash_duo):
 
     # Start the Dash app
     dash_duo.start_server(app)
-
-    # Navigate to the map view page
-    dash_duo.driver.get(dash_duo.server_url + '/map_view')
 
     # Wait for the map to load
     WebDriverWait(dash_duo.driver, 30).until(

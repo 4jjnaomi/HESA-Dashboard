@@ -3,6 +3,7 @@ import pandas as pd
 from dash import html, dash_table
 import dash_bootstrap_components as dbc
 import plotly.express as px
+from urllib.parse import quote
 
 def create_scatter_mapbox():
     hei_data = Path(__file__).parent.parent.joinpath('data', 'hei_data.csv')
@@ -80,10 +81,12 @@ def create_ranking_table(ClassName, AcademicYear):
     # Rename columns
     pivot_df.columns.name = None
 
+    pivot_df['HE Provider'] = pivot_df.apply(lambda row: f"<a href=/university/{quote(row['HE Provider'])}>{row['HE Provider']}</a>", axis=1)
+
     # Converting to DataTable with sorting enabled
     table = dash_table.DataTable(
         id='ranking-table',
-        columns=[{'name': col, 'id': col} for col in pivot_df.columns],
+        columns=[{'name': col, 'id': col, 'presentation': "markdown"} for col in pivot_df.columns],
         data=pivot_df.to_dict('records'),
         style_table={'overflowX': 'auto'},
         style_header={'backgroundColor': 'rgb(204, 255, 221)', 'fontWeight': 'bold'},
@@ -93,6 +96,7 @@ def create_ranking_table(ClassName, AcademicYear):
         export_format='csv',
         sort_action='native',
         filter_action='native',
+        markdown_options={'html': True}
     )
 
     return table

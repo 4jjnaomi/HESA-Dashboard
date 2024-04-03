@@ -17,8 +17,8 @@ app = Dash(__name__, external_stylesheets=external_stylesheets, meta_tags=meta_t
 # From https://dash-bootstrap-components.opensource.faculty.ai/docs/components/navbar/
 navbar = dbc.NavbarSimple(
     children=[
-        dbc.NavItem(dbc.NavLink("Map View", href=dash.page_registry['pages.map_view']['path'])),
         dbc.NavItem(dbc.NavLink("Ranking Table", href=dash.page_registry['pages.ranking_table']['path'])),
+        dbc.NavItem(dbc.NavLink("HEI Comparison", href=dash.page_registry['pages.comparison']['path'])),
     ],
     brand="UK HEI Environmental Dashboard",
     brand_href="/",

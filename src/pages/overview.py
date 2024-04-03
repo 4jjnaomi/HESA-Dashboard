@@ -39,12 +39,12 @@ def sidebar():
         for link in sidebar_links
     ]
 
-    instructions = html.P("Click on Toggle Sidebar to see all universities. Click on a university to go to its overview page.", className="lead", style={"font-size": 15, "padding": 10})
+    instructions = html.P("Click on a HEI to go to its overview page.", className="lead", style={"font-size": 15, "padding": 10, "font-weight": "bold"})
 
     search_bar = dbc.Input(
         id = "search_input",
         type="search",
-        placeholder="Search for a university",
+        placeholder="Search for a HEI",
         className="mb-3",
         style=({"padding": 10})
     )
@@ -55,7 +55,7 @@ def sidebar():
                 id = "collapse")
 
     toggle_button = dbc.Button(
-        "Toggle Sidebar", 
+        "Choose a HEI", 
         id="toggle", 
         className="mb-3", 
         color="primary"
@@ -87,13 +87,16 @@ line_chart = create_line_chart(None, None, None)
 def layout(he_provider=None):
     decoded_he_provider = unquote(he_provider)
     row_one = dbc.Row([
-        dbc.Col([html.H1(f"Overview of {decoded_he_provider}")], width=12)
+        dbc.Col([html.H1(f"{decoded_he_provider}")], width=12)
     ])
     row_two = dbc.Row([
+        dbc.Col(children = [html.P(f"Use this page to see how {decoded_he_provider} has performed between 2018/19 - 2012/22 in various environmental categories."), html.P("You can analyse other universities using the button to the side.", style={"font-weight": "bold"})], width=12)
+    ])
+    row_three = dbc.Row([
         dbc.Col([html.P(children=["Class", class_dropdown], style={"font-size": 20})], width=6),
         dbc.Col([html.P(children=["Category Marker", category_marker_dropdown], style={"font-size": 20})], width=6)
     ])
-    row_three = dbc.Row([
+    row_four = dbc.Row([
         dbc.Col(children=[dcc.Graph(figure=line_chart, id='overview_line_chart')], width=12)
     ])
     page_layout = dbc.Container([
@@ -102,7 +105,8 @@ def layout(he_provider=None):
             dbc.Col([
                 row_one,
                 row_two,
-                row_three
+                row_three,
+                row_four
             ], width=10)
         ])
     ])
