@@ -5,3 +5,4 @@ pytest
 selenium
 dash[testing]
 requests
+pytest-cov
