@@ -39,10 +39,20 @@ def sidebar():
         for link in sidebar_links
     ]
 
-    collapse = dbc.Collapse(
-        dbc.Nav(nav_links, vertical=True),
-        id="collapse"
+    instructions = html.P("Click on Toggle Sidebar to see all universities. Click on a university to go to its overview page.", className="lead", style={"font-size": 15, "padding": 10})
+
+    search_bar = dbc.Input(
+        id = "search_input",
+        type="search",
+        placeholder="Search for a university",
+        className="mb-3",
+        style=({"padding": 10})
     )
+
+    collapse = dbc.Collapse(
+        children=[search_bar,
+                dbc.Nav(nav_links, vertical=True, id="sidebar-nav")],
+                id = "collapse")
 
     toggle_button = dbc.Button(
         "Toggle Sidebar", 
@@ -51,15 +61,8 @@ def sidebar():
         color="primary"
     )
 
-    search_bar = dbc.Input(
-        id = "search_input",
-        type="search",
-        placeholder="Search for a university",
-        className="mb-3"
-    )
-
     sidebar_layout = dbc.Nav(
-        [search_bar, toggle_button, collapse],
+        [instructions, toggle_button, collapse],
         vertical=True,
     )
 
@@ -116,11 +119,10 @@ def toggle_collapse(n, is_open):
     return is_open
 
 @callback(
-    Output("collapse", "children"),
+    Output("sidebar-nav", "children"),
     [Input("search_input", "value")]
 )
-
-def update_sidebar(search_value):
+def update_nav(search_value):
     universities = generate_sidebar_links()
     
     if not search_value:
