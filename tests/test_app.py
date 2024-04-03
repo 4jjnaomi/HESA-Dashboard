@@ -419,7 +419,7 @@ def test_overview_page_layout(dash_duo):
     dash_duo.start_server(app)
 
     # Navigate to the overview page
-    dash_duo.driver.get(dash_duo.server_url + '/university/ University College London')
+    dash_duo.driver.get(dash_duo.server_url + '/university/University College London')
 
     # Wait for the page to load
     WebDriverWait(dash_duo.driver, 30).until(
@@ -451,7 +451,7 @@ def test_overview_update_line_chart(dash_duo):
     dash_duo.start_server(app)
 
     # Navigate to the overview page
-    dash_duo.driver.get(dash_duo.server_url + '/university/ University College London')
+    dash_duo.driver.get(dash_duo.server_url + '/university/University College London')
 
     # Wait for the page to load
     WebDriverWait(dash_duo.driver, 30).until(
@@ -496,7 +496,7 @@ def test_toggle_sidebar_button(dash_duo):
     dash_duo.start_server(app)
 
     # Navigate to the overview page
-    dash_duo.driver.get(dash_duo.server_url + '/university/ University College London')
+    dash_duo.driver.get(dash_duo.server_url + '/university/University College London')
 
     # Wait for the page to load
     WebDriverWait(dash_duo.driver, 30).until(
