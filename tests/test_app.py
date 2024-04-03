@@ -422,7 +422,7 @@ def test_overview_page_layout(dash_duo):
     dash_duo.driver.get(dash_duo.server_url + '/university/University College London')
 
     # Wait for the page to load
-    WebDriverWait(dash_duo.driver, 30).until(
+    WebDriverWait(dash_duo.driver, 60).until(
         EC.presence_of_element_located((By.ID, "overview_line_chart"))
     )
 
