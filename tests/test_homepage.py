@@ -131,7 +131,7 @@ def test_region_dropdown_map_updates(dash_duo):
     region_dropdown_menu.click()
     #ActionChains(dash_duo.driver).click(region_dropdown_menu).perform()
     #Select the region dropdown input
-    region_dropdown_input = dash_duo.driver.find_element(By.CSS_SELECTOR, "##react-select-6--value > div.Select-input > input")
+    region_dropdown_input = dash_duo.driver.find_element(By.CSS_SELECTOR, "#react-select-6--value > div.Select-input > input")
     region_dropdown_input.send_keys("North East")
     region_dropdown_input.send_keys(Keys.RETURN)
 
