@@ -18,7 +18,7 @@ year_dropdown = dcc.Dropdown(
 class_dropdown = dbc.Select(
     id="class-dropdown-comparison",
     options=["Building and spaces", "Energy", "Emissions and waste", "Transport and environment", "Finances and people"],
-    value="Building and spaces"
+    placeholder='Choose a class to see available category markers'
 )
 
 category_marker_dropdown = dbc.Select(

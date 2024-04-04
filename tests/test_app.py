@@ -175,7 +175,7 @@ def test_map_marker_select_updates_card(dash_duo):
     # Assert that the card text is not empty
     assert card_text != ""
 
-def test_dropdown_map_updates(dash_duo):
+def test_region_dropdown_map_updates(dash_duo):
     """
     GIVEN the app is running which has a <div id='map'>
     WHEN a region is selected from the region dropdown
@@ -424,6 +424,15 @@ def test_comparison_page_callback(dash_duo):
         EC.presence_of_element_located((By.ID, "bar_chart"))
     )
 
+    #Get the class dropdown element
+    class_dropdown_element = dash_duo.driver.find_element(By.ID, "class-dropdown-comparison")
+
+    # Initialize Select object for the class dropdown
+    class_dropdown = Select(class_dropdown_element)
+
+    # Select the option with value "Building and spaces"
+    class_dropdown.select_by_value("Building and spaces")
+
     #Get the category marker dropdown element
     category_marker_dropdown_element = dash_duo.driver.find_element(By.ID, "category-marker-dropdown-comparison")
 
@@ -524,6 +533,15 @@ def test_overview_update_line_chart(dash_duo):
 
     # Get the initial line chart content
     initial_line_chart_content = dash_duo.find_element("#overview_line_chart").text
+
+    # Get the class dropdown element
+    class_dropdown_element = dash_duo.driver.find_element(By.ID, "class-dropdown")
+
+    # Initialize Select object for the class dropdown
+    class_dropdown = Select(class_dropdown_element)
+
+    # Select the option with value "Building and spaces"
+    class_dropdown.select_by_value("Building and spaces")
 
     #Get the category marker dropdown element
     category_marker_dropdown_element = dash_duo.driver.find_element(By.ID, "category-marker-dropdown")
@@ -762,6 +780,46 @@ def test_update_category_marker_dropdown_no_class_name(dash_duo):
     # Assert that options and value remain unchanged
     assert initial_options == updated_options
     assert initial_value == updated_value
+
+def test_comparison_update_category_marker_no_class(dash_duo):
+    """
+    GIVEN the Dash app is running
+    WHEN the user navigates to the comparison page
+    AND the class dropdown has no value selected
+    THEN the category marker dropdown options should not change
+    """
+
+    # Get the Dash app
+    app = import_app(app_file='app')
+
+    # Start the Dash app
+    dash_duo.start_server(app)
+
+    # Navigate to the comparison page
+    dash_duo.driver.get(dash_duo.server_url + '/comparison')
+
+    # Wait for the page to load
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.presence_of_element_located((By.ID, "category-marker-dropdown-comparison"))
+    )
+
+    # Initialise the Select object for the category marker dropdown
+    category_marker_dropdown_element = dash_duo.driver.find_element(By.ID, "category-marker-dropdown-comparison")
+    category_marker_dropdown = Select(category_marker_dropdown_element)
+
+    # Get the initial state of the category marker dropdown options
+    initial_options = [option.text for option in category_marker_dropdown.options]
+
+    # Simulate not selecting any option from the class dropdown to trigger the callback
+    class_dropdown_element = dash_duo.driver.find_element(By.ID, "class-dropdown-comparison")
+    class_dropdown = Select(class_dropdown_element)
+    class_dropdown.select_by_value("")
+
+    # Get the updated state of the category marker dropdown options
+    updated_options = [option.text for option in category_marker_dropdown.options]
+
+    # Assert that options remain unchanged
+    assert initial_options == updated_options
 
 
 
