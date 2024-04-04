@@ -42,7 +42,6 @@ def test_overview_update_line_chart(dash_duo):
     AND selects a category marker from the dropdown
     THEN the line chart should update accordingly
     """
-    
     # Get the Dash app
     app = import_app(app_file='app')
 
@@ -96,7 +95,6 @@ def test_toggle_sidebar_button(dash_duo):
     AND clicks on the toggle sidebar button
     THEN the sidebar should expand accordingly
     """
-    
     # Get the Dash app
     app = import_app(app_file='app')
 
@@ -142,7 +140,7 @@ def test_toggle_sidebar_button(dash_duo):
 
     # Assert that the sidebar has collapsed
     assert "show" not in updated_sidebar_state
-    
+
 def test_sidebar_search(dash_duo):
     """
     GIVEN the Dash app is running
@@ -151,7 +149,6 @@ def test_sidebar_search(dash_duo):
     AND enters a search term in the sidebar search input
     THEN the sidebar should display only the universities that match the search term
     """
-    
     # Get the Dash app
     app = import_app(app_file='app')
 
@@ -198,7 +195,6 @@ def test_sidebar_link(dash_duo):
     AND clicks on a university link in the sidebar
     THEN the page should navigate to the overview page of the selected university
     """
-    
     # Get the Dash app
     app = import_app(app_file='app')
 
@@ -244,7 +240,6 @@ def test_non_existent_university_overview(dash_duo):
     WHEN the user goes to the overview page of a non-existent university
     THEN the app should display a message that the university was not found
     """
-    
     # Get the Dash app
     app = import_app(app_file='app')
 
@@ -306,4 +301,3 @@ def test_update_category_marker_dropdown_no_class_name(dash_duo):
     # Assert that options and value remain unchanged
     assert initial_options == updated_options
     assert initial_value == updated_value
-

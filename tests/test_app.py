@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+
 def test_server_live(dash_duo):
     """
     GIVEN the Dash app is running
@@ -23,16 +24,17 @@ def test_server_live(dash_duo):
     # Wait for the page to load
     time.sleep(2)
 
-    #Get the url
+    # Get the url
     url = dash_duo.driver.current_url
 
-    #Make a HTTP request to the home page
+    # Make a HTTP request to the home page
     response = requests.get(url, timeout=5)
 
     # Assert the server responds with a 200 status code
     assert response.status_code == 200
 
-@pytest.mark.parametrize("link_index, expected_url", [(0,'/'), (1, '/ranking_table'), (2, '/comparison')])
+
+@pytest.mark.parametrize("link_index, expected_url", [(0, '/'), (1, '/ranking_table'), (2, '/comparison')])
 def test_navbar_links(dash_duo, link_index, expected_url):
     """
     GIVEN the Dash app is running
@@ -56,10 +58,12 @@ def test_navbar_links(dash_duo, link_index, expected_url):
     links[link_index].click()
 
     # Wait for the page to load
-    WebDriverWait(dash_duo.driver, 30).until(EC.url_to_be(dash_duo.server_url + expected_url))
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.url_to_be(dash_duo.server_url + expected_url))
 
     # Assert that the URL has changed to the correct page
     assert dash_duo.driver.current_url == dash_duo.server_url + expected_url
+
 
 def test_404_page(dash_duo):
     """
@@ -87,4 +91,3 @@ def test_404_page(dash_duo):
 
     # Assert that the h1 element contains the expected text
     assert "404 - Page not found" in h1_text
-

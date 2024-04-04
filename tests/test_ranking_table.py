@@ -61,7 +61,6 @@ def test_ranking_table_callback(dash_duo):
 
     # Find the class dropdown element
     class_dropdown_element = dash_duo.driver.find_element(By.ID, "class-dropdown-rank")
-    
     # Initialize Select object for the class dropdown
     class_dropdown = Select(class_dropdown_element)
 
