@@ -20,8 +20,7 @@ def create_dropdown(id1, options, placeholder, multi=False, dropdown_type='dcc')
         return dbc.Select(
             id=id1,
             options=options,
-            placeholder=placeholder,
-            multi=multi
+            placeholder=placeholder
         )
     else:
         raise ValueError("Invalid dropdown_type. Use 'dcc' or 'dbc'.")
