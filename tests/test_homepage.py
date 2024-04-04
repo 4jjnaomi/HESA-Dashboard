@@ -126,8 +126,11 @@ def test_region_dropdown_map_updates(dash_duo):
     region_dropdown_element = dash_duo.driver.find_element(By.ID, "region-dropdown-map")
     region_dropdown_element.click()
 
-    #Select the region dropdown input
-    region_dropdown_input = dash_duo.driver.find_element(By.CSS_SELECTOR, "#react-select-6--value > div.Select-input > input")
+    #Select the region dropdown input div
+    region_dropdown_input_div = dash_duo.driver.find_element(By.CLASS_NAME, "Select-input")
+    #Find the input element within the region dropdown input div
+    region_dropdown_input = region_dropdown_input_div.find_element(By.TAG_NAME, "input")
+    #Enter "North East" into the region dropdown input
     region_dropdown_input.send_keys("North East")
     region_dropdown_input.send_keys(Keys.RETURN)
 
@@ -173,15 +176,17 @@ def test_map_card_link_opens(dash_duo):
         EC.presence_of_element_located((By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
     )
 
+    time.sleep(5)
+
     # Find the target map element
     map_element = dash_duo.driver.find_element(By.ID, "england_map")
 
     # Use ActionChains to move to the center of the map element
     ActionChains(dash_duo.driver).move_to_element(map_element).perform()
-    ActionChains(dash_duo.driver).move_by_offset(0, 0.001).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0.).perform()
     ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
-    ActionChains(dash_duo.driver).move_by_offset(0, 0.001).perform()
-    ActionChains(dash_duo.driver).move_by_offset(0.001, 0).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
 
 
     # Wait for the card to appear
