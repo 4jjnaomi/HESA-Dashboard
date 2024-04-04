@@ -62,6 +62,15 @@ def test_comparison_page_callback(dash_duo):
         EC.presence_of_element_located((By.ID, "bar_chart"))
     )
 
+    #Click the year dropdown element
+    year_dropdown_element = dash_duo.driver.find_element(By.ID, "year-dropdown-comparison")
+    year_dropdown_element.click()
+
+    #Find the year dropdown menu
+    year_dropdown_menu = dash_duo.driver.find_element(By.CLASS_NAME, "Select-menu-outer")
+    #Click the first option in the dropdown
+    ActionChains(dash_duo.driver).click(year_dropdown_menu).perform()
+
     #Get the class dropdown element
     class_dropdown_element = dash_duo.driver.find_element(By.ID, "class-dropdown-comparison")
 

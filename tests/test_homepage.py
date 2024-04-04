@@ -5,6 +5,7 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
 
 def test_homepage_content(dash_duo):
     """
@@ -127,14 +128,12 @@ def test_region_dropdown_map_updates(dash_duo):
 
     #Find the region dropdown menu
     region_dropdown_menu = dash_duo.driver.find_element(By.CLASS_NAME, "Select-menu-outer")
-
-    #Click an option in the region dropdown
-    ActionChains(dash_duo.driver).click(region_dropdown_menu).perform()
-
-    #Wait for the region dropdown to disappear
-    WebDriverWait(dash_duo.driver, 30).until(
-        EC.invisibility_of_element_located((By.CLASS_NAME, "Select-menu-outer"))
-    )
+    region_dropdown_menu.click()
+    #ActionChains(dash_duo.driver).click(region_dropdown_menu).perform()
+    #Select the region dropdown input
+    region_dropdown_input = dash_duo.driver.find_element(By.CSS_SELECTOR, "##react-select-6--value > div.Select-input > input")
+    region_dropdown_input.send_keys("North East")
+    region_dropdown_input.send_keys(Keys.RETURN)
 
     time.sleep(3)
 
