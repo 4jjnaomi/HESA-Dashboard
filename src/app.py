@@ -14,43 +14,47 @@ meta_tags = [
 # Pass the stylesheet variable to the Dash app constructor
 app = Dash(__name__, external_stylesheets=external_stylesheets, meta_tags=meta_tags, use_pages=True, suppress_callback_exceptions=True)
 
-# From https://dash-bootstrap-components.opensource.faculty.ai/docs/components/navbar/
-navbar = dbc.NavbarSimple(
-    children=[
-        dbc.NavItem(dbc.NavLink("Ranking Table", href=dash.page_registry['pages.ranking_table']['path'])),
-        dbc.NavItem(dbc.NavLink("HEI Comparison", href=dash.page_registry['pages.comparison']['path'])),
-    ],
-    brand="HEI Environmental Dashboard",
-    brand_href="/",
-    brand_style={"font-size": 40, "font-weight": "bold"},
-    color="primary",
-    dark=True,
-)
-
-footer = dbc.Container(
-    dbc.Row(
-        [dbc.Col(
-                html.Div([
-                    html.P("Data Source: HESA", style={"color": "white"}, className="my-0"),
-                    html.P([" Data file canonical link: ", html.A("https://www.hesa.ac.uk/data-and-analysis/estates/data.csv", href="https://www.hesa.ac.uk/data-and-analysis/estates/data.csv", style={"color": "white"})], style = { "color": "white"}, className="my-0"),
-                    html.P(" Data file license: Creative Commons Attribution 4.0 International Licence", style={"color": "white"}, className="my-0")
-                ]),
-                width=6
-            )
+# Function to create a navigation bar with links to different pages
+def create_navbar():
+    return dbc.NavbarSimple(
+        children=[
+            dbc.NavItem(dbc.NavLink("Ranking Table", href=dash.page_registry['pages.ranking_table']['path'])),
+            dbc.NavItem(dbc.NavLink("HEI Comparison", href=dash.page_registry['pages.comparison']['path'])),
         ],
-        justify="center"
-    ),
-    fluid=True,
-    style={"text-align": "center"}, className="bg-primary mt-3"
-)
+        brand="HEI Environmental Dashboard",
+        brand_href="/",
+        brand_style={"font-size": 40, "font-weight": "bold"},
+        color="primary",
+        dark=True,
+    )
 
+# Function to create the footer
+def create_footer():
+    return dbc.Container(
+        dbc.Row(
+            [dbc.Col(
+                    html.Div([
+                        html.P("Data Source: HESA", style={"color": "white"}, className="my-0"),
+                        html.P([" Data file canonical link: ", html.A("https://www.hesa.ac.uk/data-and-analysis/estates/data.csv", href="https://www.hesa.ac.uk/data-and-analysis/estates/data.csv", style={"color": "white"})], style = { "color": "white"}, className="my-0"),
+                        html.P(" Data file license: Creative Commons Attribution 4.0 International Licence", style={"color": "white"}, className="my-0")
+                    ]),
+                    width=6
+                )
+            ],
+            justify="center"
+        ),
+        fluid=True,
+        style={"text-align": "center"}, className="bg-primary mt-3"
+    )
+
+# Define the layout of the application
 app.layout = html.Div([
     # Nav bar
-    navbar,
+    create_navbar(),
     # Area where the page content is displayed
     dash.page_container,
     # Footer
-    footer,
+    create_footer(),
     dcc.Location(id='url', refresh=True)
 ])
 

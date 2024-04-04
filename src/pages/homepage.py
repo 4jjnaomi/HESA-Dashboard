@@ -1,5 +1,4 @@
 from pathlib import Path
-
 from dash import html, register_page, dcc, callback, Output, Input, callback_context
 import dash_bootstrap_components as dbc
 import pandas as pd
@@ -8,83 +7,60 @@ from figures import create_scatter_mapbox, create_card
 # Register the page with the Dash app
 register_page(__name__, name="Homepage", path='/')
 
-button1 = html.Div([
-    dbc.Button([html.H6("Ranking Table"), html.P("See the performance of all HEIs")], color="primary", href="/ranking_table", style = {"height": "70px"}, id="ranking_table-button") 
-],
-className="d-grid gap-2 mx-auto"
-)
-
-button2 = html.Div([
-    dbc.Button([html.H6("HEI overview"), html.P("Analyse the performance of a specific HEI")], color="primary", href="/university/Anglia Ruskin University", style = {"height": "70px"}, id="hei_overview-button")
-],
-className="d-grid gap-2 mx-auto"
-)
-
-button3 = html.Div([
-    dbc.Button([html.H6("HEI comparison"), html.P("Compare the performance a set of HEIs")], color="primary", href="/comparison", style = {"height": "70px"}, id="hei_comparison-button")
-],
-className= "d-grid gap-2 mx-auto"
-)
-
 raw_data = Path(__file__).parent.parent.parent.joinpath('data','hei_data.csv')
 data_df = pd.read_csv(raw_data)
 
-#Create map
-map_fig = create_scatter_mapbox()
+def create_button(text, href):
+    return html.Div(
+        dbc.Button(
+            [html.H6(text), html.P("See the performance of all HEIs")],
+            color="primary",
+            href=href,
+            style={"height": "70px"},
+            id=f"{text.lower().replace(' ', '_')}-button"
+        ),
+        className="d-grid gap-2 mx-auto"
+    )
 
-#Create an array of regions
-regions = data_df['Region of HE provider'].unique()
+def create_dropdown(id1, options, placeholder, multi=False, optionHeight=50, maxHeight=350):
+    return dcc.Dropdown(
+        id=id1,
+        options=options,
+        placeholder=placeholder,
+        multi=multi,
+        optionHeight=optionHeight,
+        maxHeight=maxHeight
+    )
 
-#Create an array of HEI
-heis = data_df['HE Provider'].unique()
+def create_row(content):
+    return dbc.Row(content, style={"padding-top": "20px"})
 
-region_dropdown = dcc.Dropdown(
-    id="region-dropdown-map",
-    options=regions,
-    placeholder="Select Region(s)",
-    multi=True
-)
+def layout():
+    regions = [{'label': region, 'value': region} for region in data_df['Region of HE provider'].unique()]
+    heis = [{'label': hei, 'value': hei} for hei in data_df['HE Provider'].unique()]
 
-hei_dropdown = dcc.Dropdown(
-    id="hei-dropdown-map",
-    options=heis,
-    placeholder="Select HEI(s)",
-    multi=True,
-    optionHeight=50,
-    maxHeight=350
-)
+    button1 = create_button("Ranking Table", "/ranking_table")
+    button2 = create_button("HEI overview", "/university/Anglia Ruskin University")
+    button3 = create_button("HEI comparison", "/comparison")
 
-row_one = html.Div([
-    html.H1('Welcome to the England HEI Environmental Dashboard')
-])
+    region_dropdown = create_dropdown("region-dropdown-map", regions, "Select Region(s)", multi=True)
+    hei_dropdown = create_dropdown("hei-dropdown-map", heis, "Select HEI(s)", multi=True)
 
-row_two = html.Div([
-    html.P
-    ('This dashboard provides an overview of the environmental performance of Higher Education Institutions (HEIs) in England.')
-])
+    row_one = html.Div([html.H1('Welcome to the England HEI Environmental Dashboard')])
+    row_two = html.Div([html.P('This dashboard provides an overview of the environmental performance of Higher Education Institutions (HEIs) in England.')])
+    row_three = create_row([dbc.Col(button1, width=4), dbc.Col(button2, width=4), dbc.Col(button3, width=4)])
 
-row_three = dbc.Row([
-    dbc.Col(button1, width=4),
-    dbc.Col(button2, width=4),
-    dbc.Col(button3, width=4)
-])
+    row_four = create_row([
+        dbc.Col(children=[
+            html.P("The map shows the location of HEIs in England. Hover over a point to see more information about the HEI.", style={"font-size": "14px"}),
+            html.P(children=["Filter Regions", region_dropdown], style={"background-color": "lightgrey"}),
+            html.P(["Filter HEIs", hei_dropdown], style={"background-color": "lightgrey"})], width=2),
+        dbc.Col(children=[dcc.Graph(figure=create_scatter_mapbox(), id='england_map')], width=8),
+        dbc.Col(children=[html.Div(id='card')], width=2)
+    ])
 
-row_four = dbc.Row([
-    dbc.Col(children=[html.P("The map shows the location of HEIs in England.  Hover over a point to see more information about the HEI.", style={"font-size": "14px"}),
-                      html.P(children=["Filter Regions", region_dropdown], style={"background-color": "lightgrey"}), 
-                      html.P(["Filter HEIs", hei_dropdown], style={"background-color": "lightgrey"} )], width=2),
-    dbc.Col(children=[dcc.Graph(figure=map_fig, id='england_map')], width=8),
-    dbc.Col(children=[html.Div(id='card')], width=2)
-],
-style={"padding-top": "20px"})
-
-
-layout =  dbc.Container([
-    row_one,
-    row_two,
-    row_three,
-    row_four
-])
+    layout_page = dbc.Container([row_one, row_two, row_three, row_four])
+    return layout_page
 
 @callback(
     Output('hei-dropdown-map', 'options'),
@@ -92,12 +68,10 @@ layout =  dbc.Container([
 )
 def update_hei_options(selected_regions):
     if selected_regions:
-        # Filter HEIs based on selected regions
         heis_in_selected_regions = data_df[data_df['Region of HE provider'].isin(selected_regions)]['HE Provider']
         hei_options = [{'label': hei, 'value': hei} for hei in heis_in_selected_regions]
     else:
-        # If no regions are selected, show all HEIs
-        hei_options = [{'label': hei, 'value': hei} for hei in heis]
+        hei_options = [{'label': hei, 'value': hei} for hei in data_df['HE Provider']]
 
     return hei_options
 
@@ -123,5 +97,6 @@ def update_map(selected_regions, selected_heis):
 def display_card(hover_data):
     if hover_data is not None:
         ukprn = hover_data['points'][0]['customdata']
-        if  ukprn is not None:
+        if ukprn is not None:
             return create_card(ukprn)
+

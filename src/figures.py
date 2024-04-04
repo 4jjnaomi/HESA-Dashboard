@@ -6,268 +6,169 @@ import plotly.express as px
 from urllib.parse import quote
 import plotly.graph_objects as go
 
+def load_data(file_path, columns):
+    data_df = pd.read_csv(file_path, usecols=columns)
+    return data_df
+
+def filter_dataframe(data_df, filters):
+    for column, values in filters.items():
+        data_df = data_df[data_df[column].isin(values)]
+    return data_df
+
 def create_scatter_mapbox(region=None, hei=None):
     hei_data = Path(__file__).parent.parent.joinpath('data', 'hei_data.csv')
     cols = ['UKPRN', 'HE Provider', 'Region of HE provider', 'lat', 'lon']
-    df_loc = pd.read_csv(hei_data, usecols=cols)
-
+    df_loc = load_data(hei_data, cols)
     if region:
-        df_loc = df_loc[df_loc['Region of HE provider'].isin(region)]
+        df_loc = filter_dataframe(df_loc, {'Region of HE provider': region})
     if hei:
-        df_loc = df_loc[df_loc['HE Provider'].isin(hei)]
+        df_loc = filter_dataframe(df_loc, {'HE Provider': hei})
 
-    # Create a color scale based on regions
     regions = df_loc['Region of HE provider'].unique()
     colors = px.colors.qualitative.Set3[:len(regions)]
     color_scale = {region: color for region, color in zip(regions, colors)}
 
     fig = go.Figure()
-
-    # Dictionary to track regions added to the legend
     added_regions = {}
 
-    # Add markers for each location
-    for index, row in df_loc.iterrows():
-        # Unique identifier
+    for _, row in df_loc.iterrows():
         region = row['Region of HE provider']
-        if region not in added_regions:  # Only add the region to the legend if it hasn't been added before
+        trace_settings = dict(lat=[row['lat']], lon=[row['lon']], mode='markers',
+                              marker=dict(size=12, color=color_scale[region], opacity=0.7),
+                              text=row['HE Provider'], hoverinfo='text',
+                              customdata=[row['UKPRN']])
+
+        if region not in added_regions:
+            trace_settings['name'] = region
             added_regions[region] = True
-            fig.add_trace(go.Scattermapbox(
-                lat=[row['lat']],
-                lon=[row['lon']],
-                mode='markers',
-                marker=dict(size=12, color=color_scale[region], opacity=0.7),  # Color based on region
-                text=row['HE Provider'],
-                hoverinfo='text',
-                name=region,  # Show legend for regions
-                customdata=[row['UKPRN']],  # Use UKPRN as additional marker data
-            ))
-        else:  # If the region has already been added, don't add it again to the legend
-            fig.add_trace(go.Scattermapbox(
-                lat=[row['lat']],
-                lon=[row['lon']],
-                mode='markers',
-                marker=dict(size=12, color=color_scale[region], opacity=0.7),  # Color based on region
-                text=row['HE Provider'],
-                hoverinfo='text',
-                showlegend=False,  # Don't add this trace to the legend
-                customdata=[row['UKPRN']],  # Use UKPRN as additional marker data
-            ))
+        else:
+            trace_settings['showlegend'] = False
 
-    # Configure map layout
-    fig.update_layout(
-        mapbox_style="carto-positron",
-        mapbox_zoom=4.8,
-        mapbox_center={"lat": df_loc['lat'].mean(), "lon": df_loc['lon'].mean()},
-        margin={"r": 0, "t": 0, "l": 0, "b": 0},
-        width=800,
-        height=370,
-        legend_title_text='Region',  # Set legend title to 'Region'
-        showlegend=True  # Show legend
-        
-    )
+        fig.add_trace(go.Scattermapbox(**trace_settings))
 
+    fig.update_layout(mapbox_style="carto-positron", mapbox_zoom=4.8,
+                      mapbox_center={"lat": df_loc['lat'].mean(), "lon": df_loc['lon'].mean()},
+                      margin={"r": 0, "t": 0, "l": 0, "b": 0}, width=800, height=370,
+                      legend_title_text='Region', showlegend=True)
     return fig
 
-def create_ranking_table(ClassName=None, acedemic_year=None,            selected_regions=None):
-    # Load the dataset
-    data_path = Path(__file__).parent.parent.joinpath('data','dataset_prepared.csv')
-    data_df = pd.read_csv(data_path)
-    cols = ['HE Provider','Region of HE provider', 'Academic Year', 'Class', 'Category', 'Value']
-    data_df = data_df[cols]
-
-    # Filter the DataFrame by 'Class' and 'Academic Year'
-    data_df = data_df[(data_df['Class'] == ClassName) & (data_df['Academic Year'] == acedemic_year)] 
-    
+def filter_data_for_table(data_df, ClassName, acedemic_year, selected_regions):
+    data_df = data_df[(data_df['Class'] == ClassName) & (data_df['Academic Year'] == acedemic_year)]
     if selected_regions:
-        data_df = data_df[data_df['Region of HE provider'].isin(selected_regions)]
+        data_df = filter_dataframe(data_df, {'Region of HE provider': selected_regions})
+    return data_df
 
-    # Convert 'Value' column to numeric, ignoring errors
+def format_number(number):
+    suffixes = ['', 'k', 'M', 'B']
+    magnitude = 0
+    while abs(number) >= 1000:
+        magnitude += 1
+        number /= 1000.0
+    return f"{round(number, 3)}{suffixes[magnitude]}"
+
+def create_card(ukprn):
+    hei_data_path = Path(__file__).parent.parent.joinpath('data', 'hei_data.csv')
+    data_df = load_data(hei_data_path, ['HE Provider', 'UKPRN'])
+    row = data_df[data_df['UKPRN'] == ukprn]
+    ukprn_value, he_name = row.iloc[0]  # Swap the variable assignments
+
+    entry_data_path = Path(__file__).parent.parent.joinpath('data', 'entry_data.csv')
+    entry_data_df = load_data(entry_data_path, ['HE Provider', 'Category', 'Value', 'Academic Year'])
+    he_entries = entry_data_df[(entry_data_df['HE Provider'] == he_name) & (entry_data_df['Academic Year'] == '2021/22')]
+
+    # Check if he_entries DataFrame is empty before accessing its elements
+    formatted_income = "No data"
+    formatted_emissions = "No data"
+    if not he_entries.empty:
+        # Access elements and calculate formatted_income and formatted_emissions
+        formatted_income_series = he_entries[he_entries['Category'] == 'Total income (£)']['Value']
+        formatted_emissions_series = he_entries[he_entries['Category'] == 'Total scope 1 and 2 carbon emissions (Kg CO2e)']['Value']
+        if not formatted_income_series.empty:
+            formatted_income = format_number(float(formatted_income_series.iloc[0]))
+        if not formatted_emissions_series.empty:
+            formatted_emissions = format_number(float(formatted_emissions_series.iloc[0]))
+
+    card = dbc.Card([
+        dbc.CardHeader(html.A(html.H4(he_name, className='card-title'), href=f"/university/{he_name}")),
+        dbc.CardBody([
+            html.H6(f"UKPRN: {ukprn_value}", className='card-subtitle pb-2'),
+            html.H6("Key metrics (2021/22):", style={"font-weight": "bold"}),
+            html.H6(f"Total income: £{formatted_income}", className='card-subtitle pb-2'),
+            html.H6(f"Total scope 1 and 2 carbon emissions: {formatted_emissions} Kg CO2e", className='card-subtitle pb-2')
+        ])
+    ])
+    return card
+def create_line_chart(hei=None, Class=None, category_marker=None):
+    data_path = Path(__file__).parent.parent.joinpath('data', 'entry_data.csv')
+    data_df = load_data(data_path, ['Academic Year', 'HE Provider', 'Class', 'Category marker', 'Category', 'Value'])
+    data_df = data_df[(data_df['HE Provider'] == hei) & (data_df['Category marker'] == category_marker) & (data_df['Class'] == Class)]
     data_df['Value'] = pd.to_numeric(data_df['Value'], errors='coerce')
+    data_df = data_df.sort_values(by='Academic Year')
+    fig = px.line(data_df, x='Academic Year', y='Value', color='Category', markers=True, color_discrete_sequence=px.colors.qualitative.Set3)
+    
+    if category_marker:
+        fig.update_layout(title=f"Trend of '{category_marker}' categories:")
+    else:
+        fig.update_layout(title="Trend of categories:")
+        
+    return fig
 
+def create_options_from_data(data_df, column):
+    return data_df[column].unique().tolist()
+
+def create_bar_chart(hei=None, year=None, category=None):
+    data_path = Path(__file__).parent.parent.joinpath('data', 'entry_data.csv')
+    data_df = load_data(data_path, ['Academic Year', 'HE Provider', 'Category marker', 'Category', 'Value'])
+    if year:
+        data_df = data_df[data_df['Academic Year'].isin(year)]
+    if category:
+        data_df = data_df[data_df['Category'] == category]
+    if hei:
+        data_df = data_df[data_df['HE Provider'].isin(hei)]
+    data_df['Value'] = pd.to_numeric(data_df['Value'], errors='coerce')
+    unique_years = sorted(data_df['Academic Year'].unique())
+    color_scale = px.colors.qualitative.Set3[:len(unique_years)]
+    data_df = data_df.drop_duplicates()
+    fig = px.bar(data_df, x='HE Provider', y='Value', color='Academic Year', barmode='group', color_discrete_sequence=color_scale)
+    title = f"{data_df['Category marker'].iloc[0]}: {category}" if category else None
+    fig.update_layout(title_text=title)
+    return fig
+
+def create_ranking_table(ClassName=None, academic_year=None, selected_regions=None):
+    data_path = Path(__file__).parent.parent.joinpath('data', 'dataset_prepared.csv')
+    data_df = load_data(data_path, ['HE Provider','Region of HE provider', 'Academic Year', 'Class', 'Category', 'Value'])
+    data_df = filter_data_for_table(data_df, ClassName, academic_year, selected_regions)
+    data_df['Value'] = pd.to_numeric(data_df['Value'], errors='coerce')
     category_order = data_df['Category'].unique().tolist()
     new_category_order = list(filter(lambda x: x != 'Environmental management system external verification', category_order))
-
-    # Pivot the DataFrame to have categories as columns
-    pivot_df = data_df.pivot_table(index='HE Provider', columns='Category', values='Value').reset_index()
-
-    pivot_df = pivot_df[['HE Provider'] + new_category_order]
-
-    # Reset index
-    pivot_df.reset_index(drop=True, inplace=True)
-
-    # Rename columns
+    pivot_df = data_df.pivot_table(index='HE Provider', columns='Category', values='Value').reset_index()[['HE Provider'] + new_category_order]
     pivot_df.columns.name = None
-
-    pivot_df['HE Provider'] = pivot_df.apply(lambda row: f"<a href=/university/{quote(row['HE Provider'])}>{row['HE Provider']}</a>", axis=1)
-
-    # Converting to DataTable with sorting enabled
+    pivot_df['HE Provider'] = pivot_df['HE Provider'].apply(lambda x: f"<a href=/university/{quote(x)}>{x}</a>")
     table = dash_table.DataTable(
         id='ranking-table',
         columns=[{'name': col, 'id': col, 'presentation': "markdown"} for col in pivot_df.columns],
         data=pivot_df.to_dict('records'),
         style_table={'overflowX': 'auto'},
         style_header={'backgroundColor': 'rgb(204, 255, 221)', 'fontWeight': 'bold'},
-        style_data_conditional=[
-            {'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(248, 248, 248)'}
-        ],
+        style_data_conditional=[{'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(248, 248, 248)'}],
         export_format='csv',
         sort_action='native',
         filter_action='native',
         markdown_options={'html': True}
     )
-
     return table
 
-def format_number(number):
-    if abs(number) < 1000:
-        return str(round(number, 3))
-    elif abs(number) < 1e6:
-        return f"{round(number / 1000, 3)}k"
-    elif abs(number) < 1e9:
-        return f"{round(number / 1e6, 3)}M"
-    else:
-        return f"{round(number / 1e9, 3)}B"
-
-#Create a card that displays the HEI name, Region and UKPRN number based on the UKPRN
-def create_card(ukprn):
-    # Load the dataset
-    data_path = Path(__file__).parent.parent.joinpath('data','hei_data.csv')
-    data_df = pd.read_csv(data_path)
-    cols = ['HE Provider', 'UKPRN']
-    data_df = data_df[cols]
-
-    # Get the row for the UKPRN
-    row = data_df[data_df['UKPRN'] == ukprn]
-
-    he_name = row['HE Provider'].values[0]
-    ukprn_value = row['UKPRN'].values[0]
-
-    #Load the entry data dataset
-    entry_data_path = Path(__file__).parent.parent.joinpath('data','entry_data.csv')
-    entry_data_df = pd.read_csv(entry_data_path)
-    cols = ['HE Provider', 'Category', 'Value', 'Academic Year']
-    entry_data_df = entry_data_df[cols]
-
-    # Filter the DataFrame by 'HE Provider' and the year 2021/22
-    he_entries = entry_data_df[(entry_data_df['HE Provider'] == he_name) & (entry_data_df['Academic Year'] == '2021/22')]
-
-    # Get the total income value for the HEI
-    total_income = he_entries[he_entries['Category'] == 'Total income (£)']
-    if not total_income.empty:
-        total_income_value = float(total_income['Value'].iloc[0])
-        formatted_income = format_number(total_income_value)
-    else:
-        formatted_income = "No data"
-
-    #Get the total scope 1 and 2 carbon emissions value for the HEI
-    total_scope_1_2 = he_entries[he_entries['Category'] == 'Total scope 1 and 2 carbon emissions (Kg CO2e)']
-    if not total_scope_1_2.empty:
-        total_scope_1_2_value = float(total_scope_1_2['Value'].iloc[0])
-        formatted_emissions = format_number(total_scope_1_2_value)
-    else:
-        formatted_emissions = "No data"
-
-    # Create a card to display the HEI name, Region and UKPRN number
-    card = dbc.Card(
-        [
-            dbc.CardHeader(html.A(
-                html.H4(he_name, className='card-title'), href=f"/university/{he_name}")
-                ),
-            dbc.CardBody(
-                [
-                    html.H6(f"UKPRN: {ukprn_value}", className='card-subtitle pb-2'),
-                    html.H6("Key metrics (2021/22):", style={"font-weight": "bold"}),
-                    html.H6(f"Total income: £{formatted_income}", className='card-subtitle pb-2'),
-                    html.H6(f"Total scope 1 and 2 carbon emissions: {formatted_emissions} Kg CO2e", className='card-subtitle pb-2')
-                ]
-            ),
-        ]
-    )
-
-    return card
-
-#Create a line chart where a user can select a HEI and also select a Category marker and then see the trend of all the categories within that Category marker over the years
-def create_line_chart(hei=None, Class=None, category_marker=None):
-    # Load the dataset
-    data_path = Path(__file__).parent.parent.joinpath('data','entry_data.csv')
-    data_df = pd.read_csv(data_path)
-    cols = ['Academic Year', 'HE Provider', 'Class', 'Category marker', 'Category', 'Value']
-    data_df = data_df[cols]
-
-    # Filter the DataFrame by 'HE Provider' and 'Category'
-    data_df = data_df[(data_df['HE Provider'] == hei) & (data_df['Category marker'] == category_marker) & (data_df['Class'] == Class)]
-
-    # Convert 'Value' column to numeric, ignoring errors
-    data_df['Value'] = pd.to_numeric(data_df['Value'], errors='coerce')
-
-    #Reorder so that the years are in ascending order
-    data_df = data_df.sort_values(by='Academic Year')
-
-    # Create a line chart
-    fig = px.line(data_df, x='Academic Year', y='Value', color='Category', markers=True, color_discrete_sequence=px.colors.qualitative.Set3)
-
-    if category_marker != None:
-        fig.update_layout(title=f"Trend of '{category_marker}' categories:")
-
-    return fig
-
 def create_category_marker_options(class_name):
-    # Load the dataset
     data_path = Path(__file__).parent.parent.joinpath('data','entry_data.csv')
-    data_df = pd.read_csv(data_path)
-    data_df = data_df[data_df['Class'] == class_name]
-    category_markers = data_df['Category marker'].unique()
-    options = [category_marker for category_marker in category_markers]
-    return options
+    data_df = load_data(data_path, ['Class', 'Category marker'])  # Load 'Class' and 'Category marker' columns
+    if 'Class' in data_df.columns:  # Check if 'Class' column exists
+        data_df = data_df[data_df['Class'] == class_name]
+        return create_options_from_data(data_df, 'Category marker')
+    else:
+        return []  # Return empty list if 'Class' column does not exist
 
 def create_category_options(category_marker):
-    # Load the dataset
-    data_path = Path(__file__).parent.parent.joinpath('data','entry_data.csv')
-    data_df = pd.read_csv(data_path)
-    data_df = data_df[(data_df['Category marker'] == category_marker)]
-    categories = data_df['Category'].unique()
-    options = [category for category in categories]
-    return options
-
-#Create a bar chart where a user can select one or more hei(s) and also select a year and they can see the value of the category they've selected
-def create_bar_chart(hei=None, year=None, category=None):
-    # Load the dataset
     data_path = Path(__file__).parent.parent.joinpath('data', 'entry_data.csv')
-    data_df = pd.read_csv(data_path)
-    cols = ['Academic Year', 'HE Provider', 'Category marker', 'Category', 'Value']
-    data_df = data_df[cols]
-
-    # Filter the DataFrame by 'Academic Year' and 'Category'
-    if year:
-        data_df = data_df[data_df['Academic Year'].isin(year)]
-    if category:
-        data_df = data_df[data_df['Category'] == category]
-
-    # Filter the DataFrame by 'HE Provider'
-    if hei:
-        data_df = data_df[data_df['HE Provider'].isin(hei)]
-
-    # Convert 'Value' column to numeric, ignoring errors
-    data_df['Value'] = pd.to_numeric(data_df['Value'], errors='coerce')
-
-    # Create a list of unique years
-    unique_years = sorted(data_df['Academic Year'].unique())
-
-    # Assign a unique color to each year
-    color_scale = px.colors.qualitative.Set3[:len(unique_years)]
-
-    #Ensure each row is unique
-    data_df = data_df.drop_duplicates()
-
-    # Create a bar chart
-    fig = px.bar(data_df, x='HE Provider', y='Value', color='Academic Year', barmode='group', color_discrete_sequence=color_scale)
-
-    category_marker = data_df['Category marker'].unique()
-    category_marker = category_marker[0]
-
-    if category is not None:
-        title = f"{category_marker}: {category}"
-        fig.update_layout(title_text=title)
-
-    return fig
+    data_df = load_data(data_path, ['Category', 'Category marker'])
+    data_df = data_df[data_df['Category marker'] == category_marker]
+    return create_options_from_data(data_df, 'Category')

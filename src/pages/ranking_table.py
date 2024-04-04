@@ -21,7 +21,7 @@ region_dropdown = dcc.Dropdown(
     id="region-dropdown-map",
     placeholder="Filter Regions",
     multi=True,
-    options = ["East Midlands", "East of England", "London", "North East", "North West", "South East", "South West", "West Midlands", "Yorkshire and The Humber"]
+    options = [{"label": region, "value": region} for region in ["East Midlands", "East of England", "London", "North East", "North West", "South East", "South West", "West Midlands", "Yorkshire and The Humber"]]
 )
 
 table = create_ranking_table()
@@ -31,7 +31,10 @@ row_one = dbc.Row([
     ])
 
 row_two = dbc.Row([
-    dbc.Col(children = [html.P("Use this page to see how universities have performed in various environmental categories between 2018/19 - 2021/22. "), html.P("You can filter by class, year and region. Scroll sideways to see more metrics. The table is interactive so you can search each column for specific values and also sort by ascending or descending order.")], width=12)
+    dbc.Col([
+        html.P("Use this page to see how universities have performed in various environmental categories between 2018/19 - 2021/22."),
+        html.P("You can filter by class, year and region. Scroll sideways to see more metrics. The table is interactive so you can search each column for specific values and also sort by ascending or descending order.")
+    ], width=12)
 ])
 
 row_three = dbc.Row([
