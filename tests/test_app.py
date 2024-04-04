@@ -2,6 +2,7 @@ import time
 import requests
 import pytest
 from dash.testing.application_runners import import_app
+
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait, Select
@@ -124,6 +125,174 @@ def test_homepage_content(dash_duo):
     assert hei_dropdown.is_displayed()
     assert not card_div.is_displayed()
 
+def test_map_marker_select_updates_card(dash_duo):
+    """
+    GIVEN the app is running which has a <div id='map'>
+    THEN there should not be any elements with a class of 'card' on the page
+    WHEN a marker in the map is hovered over
+    THEN there should be one more card on the page than there was at the start
+    AND there should be a text value for the h6 heading in the card
+    """
+
+    # Get the Dash app
+    app = import_app(app_file='app')
+
+    # Start the Dash app
+    dash_duo.start_server(app)
+
+    # Wait for the map to load
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
+    )
+
+    # Get the initial number of cards
+    initial_num_cards = len(dash_duo.driver.find_elements(By.CLASS_NAME, "card-body"))
+
+    # Find the target map element
+    map_element = dash_duo.driver.find_element(By.ID, "england_map")
+
+    # Use ActionChains to move to the center of the map element
+    ActionChains(dash_duo.driver).move_to_element(map_element).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0.).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
+    
+    # Wait for the card to appear
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "card-body"))
+    )
+
+    # Get the updated number of cards
+    updated_num_cards = len(dash_duo.driver.find_elements(By.CLASS_NAME, "card-body"))
+
+    # Get the text of the h6 element in the card
+    card_text = dash_duo.driver.find_element(By.ID, "card").find_element(By.TAG_NAME, "h6").text
+
+    # Assert that the number of cards has increased by 1
+    assert updated_num_cards == (initial_num_cards + 1)
+
+    # Assert that the card text is not empty
+    assert card_text != ""
+
+def test_dropdown_map_updates(dash_duo):
+    """
+    GIVEN the app is running which has a <div id='map'>
+    WHEN a region is selected from the region dropdown
+    THEN the HEI dropdown should update accordingly
+    AND the number of groups in the legend should be 1
+    """
+    
+    # Get the Dash app
+    app = import_app(app_file='app')
+
+    # Start the Dash app
+    dash_duo.start_server(app)
+
+    # Wait for the map to load
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
+    )
+    
+    time.sleep(5)
+
+    #Find hei dropdown element
+    hei_dropdown_element = dash_duo.driver.find_element(By.ID, "hei-dropdown-map")
+    hei_dropdown_element.click()
+
+    #Count the number of option elements in the dropdown menu
+    initial_hei_menu = dash_duo.driver.find_elements(By.CLASS_NAME, "VirtualizedSelectOption")
+    initial_num_options = len(initial_hei_menu)
+
+    #Find the region dropdown element
+    region_dropdown_element = dash_duo.driver.find_element(By.ID, "region-dropdown-map")
+    region_dropdown_element.click()
+
+    #Find the region dropdown menu
+    region_dropdown_menu = dash_duo.driver.find_element(By.CLASS_NAME, "Select-menu-outer")
+
+    #Click the first option in the region dropdown
+    ActionChains(dash_duo.driver).click(region_dropdown_menu).perform()
+
+    #Wait for the region dropdown to disappear
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.invisibility_of_element_located((By.CLASS_NAME, "Select-menu-outer"))
+    )
+
+    time.sleep(3)
+
+    #Find hei dropdown element
+    element = dash_duo.driver.find_element(By.ID,"hei-dropdown-map")
+    dash_duo.driver.execute_script("arguments[0].scrollIntoView(true);", element)
+    element.click()
+
+    #Count the number of option elements in the dropdown menu
+    updated_hei_menu = dash_duo.driver.find_elements(By.CLASS_NAME, "VirtualizedSelectOption")
+    updated_num_options = len(updated_hei_menu)
+
+    #Get the updates number of groups in the legend
+    updated_group = dash_duo.driver.find_elements(By.CLASS_NAME, "legendtext")
+    updated_num_groups = len(updated_group)
+
+    #Assert that the number of options in the hei dropdown has changed
+    assert updated_num_options < initial_num_options
+
+    #Asser the number of groups in the legend is now 1
+    assert updated_num_groups == 1
+
+def test_map_card_link_opens(dash_duo):
+    """
+    GIVEN the app is running which has a <div id='map>
+    WHEN a marker in the map is selected
+    THEN there should be a card on the page
+    AND the card should contain a link
+    WHEN the link is clicked
+    THEN the page should navigate to the university overview page
+    """
+    
+    # Get the Dash app
+    app = import_app(app_file='app')
+
+    # Start the Dash app
+    dash_duo.start_server(app)
+
+    # Wait for the map to load
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
+    )
+
+    # Find the target map element
+    map_element = dash_duo.driver.find_element(By.ID, "england_map")
+
+    # Use ActionChains to move to the center of the map element
+    ActionChains(dash_duo.driver).move_to_element(map_element).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0.).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
+    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
+
+    # Wait for the card to appear
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "card"))
+    )
+
+    # Get the card element
+    card = dash_duo.driver.find_element(By.CLASS_NAME, "card")
+
+    # Get the header in the card which is a link
+    link = card.find_element(By.TAG_NAME, "H4")
+
+    # Click on the link
+    link.click()
+
+    # Wait for the page to load
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.url_contains('/university/')
+    )
+
+    # Assert that the URL has changed to the university overview page
+    assert '/university/' in dash_duo.driver.current_url
+
 def test_ranking_table_layout(dash_duo):
     """
     GIVEN the Dash app is running
@@ -198,111 +367,6 @@ def test_ranking_table_callback(dash_duo):
 
     # Assert that the table content has been updated
     assert updated_table_content != initial_table_content
-
-
-def test_map_marker_select_updates_card(dash_duo):
-    """
-    GIVEN the app is running which has a <div id='map'>
-    THEN there should not be any elements with a class of 'card' on the page
-    WHEN a marker in the map is hovered over
-    THEN there should be one more card on the page than there was at the start
-    AND there should be a text value for the h6 heading in the card
-    """
-
-    # Get the Dash app
-    app = import_app(app_file='app')
-
-    # Start the Dash app
-    dash_duo.start_server(app)
-
-    # Wait for the map to load
-    WebDriverWait(dash_duo.driver, 30).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
-    )
-
-    # Get the initial number of cards
-    initial_num_cards = len(dash_duo.driver.find_elements(By.CLASS_NAME, "card-body"))
-
-    # Find the target map element
-    map_element = dash_duo.driver.find_element(By.ID, "england_map")
-
-    # Use ActionChains to move to the center of the map element
-    ActionChains(dash_duo.driver).move_to_element(map_element).perform()
-    ActionChains(dash_duo.driver).move_by_offset(0, 0.).perform()
-    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
-    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
-    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
-    
-    # Wait for the card to appear
-    WebDriverWait(dash_duo.driver, 30).until(
-        EC.presence_of_element_located((By.CLASS_NAME, "card-body"))
-    )
-
-    # Get the updated number of cards
-    updated_num_cards = len(dash_duo.driver.find_elements(By.CLASS_NAME, "card-body"))
-
-    # Get the text of the h6 element in the card
-    card_text = dash_duo.driver.find_element(By.ID, "card").find_element(By.TAG_NAME, "h6").text
-
-    # Assert that the number of cards has increased by 1
-    assert updated_num_cards == (initial_num_cards + 1)
-
-    # Assert that the card text is not empty
-    assert card_text != ""
-
-def test_map_card_link_opens(dash_duo):
-    """
-    GIVEN the app is running which has a <div id='map>
-    WHEN a marker in the map is selected
-    THEN there should be a card on the page
-    AND the card should contain a link
-    WHEN the link is clicked
-    THEN the page should navigate to the university overview page
-    """
-    
-    # Get the Dash app
-    app = import_app(app_file='app')
-
-    # Start the Dash app
-    dash_duo.start_server(app)
-
-    # Wait for the map to load
-    WebDriverWait(dash_duo.driver, 30).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
-    )
-
-    # Find the target map element
-    map_element = dash_duo.driver.find_element(By.ID, "england_map")
-
-    # Use ActionChains to move to the center of the map element
-    ActionChains(dash_duo.driver).move_to_element(map_element).perform()
-    ActionChains(dash_duo.driver).move_by_offset(0, 0.).perform()
-    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
-    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
-    ActionChains(dash_duo.driver).move_by_offset(0, 0).perform()
-
-    # Wait for the card to appear
-    WebDriverWait(dash_duo.driver, 30).until(
-        EC.presence_of_element_located((By.CLASS_NAME, "card"))
-    )
-
-    # Get the card element
-    card = dash_duo.driver.find_element(By.CLASS_NAME, "card")
-
-    # Get the header in the card which is a link
-    link = card.find_element(By.TAG_NAME, "H4")
-
-    # Click on the link
-    link.click()
-
-    # Wait for the page to load
-    WebDriverWait(dash_duo.driver, 30).until(
-        EC.url_contains('/university/')
-    )
-
-    # Assert that the URL has changed to the university overview page
-    assert '/university/' in dash_duo.driver.current_url
-
 
 def test_comparison_page_layout(dash_duo):
     """
@@ -656,3 +720,51 @@ def test_non_existent_university_overview(dash_duo):
 
     # Assert that the h1 element contains the expected text
     assert "University not found" in h1_text
+
+def test_update_category_marker_dropdown_no_class_name(dash_duo):
+    """
+    GIVEN the Dash app is running
+    WHEN the class dropdown has no value selected
+    THEN the category marker dropdown options should not change
+    AND the category marker dropdown value should remain None
+    """
+    # Get the Dash app
+    app = import_app(app_file='app')
+
+    # Start the Dash app
+    dash_duo.start_server(app)
+
+    # Navigate to the overview page
+    dash_duo.driver.get(dash_duo.server_url + '/university/University College London')
+
+    # Wait for the page to load
+    WebDriverWait(dash_duo.driver, 30).until(
+        EC.presence_of_element_located((By.ID, "category-marker-dropdown"))
+    )
+
+    # Initialise the Select object for the category marker dropdown
+    category_marker_dropdown_element = dash_duo.driver.find_element(By.ID, "category-marker-dropdown")
+    category_marker_dropdown = Select(category_marker_dropdown_element)
+
+    # Get the initial state of the category marker dropdown options and value
+    initial_options = [option.text for option in category_marker_dropdown.options]
+    initial_value = category_marker_dropdown.first_selected_option.text
+
+    # Simulate not selecting any option from the class dropdown to trigger the callback
+    class_dropdown_element = dash_duo.driver.find_element(By.ID, "class-dropdown")
+    class_dropdown = Select(class_dropdown_element)
+    class_dropdown.select_by_value("")
+
+    # Get the updated state of the category marker dropdown options and value
+    updated_options = [option.text for option in category_marker_dropdown.options]
+    updated_value = category_marker_dropdown.first_selected_option.text
+
+    # Assert that options and value remain unchanged
+    assert initial_options == updated_options
+    assert initial_value == updated_value
+
+
+
+
+
+

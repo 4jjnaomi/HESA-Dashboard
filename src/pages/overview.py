@@ -72,7 +72,7 @@ def sidebar():
 class_dropdown = dbc.Select(
     id="class-dropdown",  # id uniquely identifies the element, will be needed later
     options=["Building and spaces", "Energy", "Emissions and waste", "Transport and environment", "Finances and people"],
-    value="Building and spaces"
+    placeholder="Choose a class to see options for 'Category Marker'"
 )
 
 #Create a dropdown for the category marker

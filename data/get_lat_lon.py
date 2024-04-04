@@ -5,7 +5,7 @@ import time
 
 geolocator = Nominatim(user_agent="HeiEnvironmentalDashboard", timeout=10)
 
-raw_data = Path(__file__).parent.parent.joinpath('data', 'hei_data.csv')
+raw_data = Path(__file__).parent.joinpath('hei_data.csv')
 data_df = pd.read_csv(raw_data)
 
 

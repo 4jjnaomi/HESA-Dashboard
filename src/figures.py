@@ -119,20 +119,54 @@ def create_ranking_table(ClassName=None, acedemic_year=None,            selected
 
     return table
 
+def format_number(number):
+    if abs(number) < 1000:
+        return str(round(number, 3))
+    elif abs(number) < 1e6:
+        return f"{round(number / 1000, 3)}k"
+    elif abs(number) < 1e9:
+        return f"{round(number / 1e6, 3)}M"
+    else:
+        return f"{round(number / 1e9, 3)}B"
+
 #Create a card that displays the HEI name, Region and UKPRN number based on the UKPRN
 def create_card(ukprn):
     # Load the dataset
     data_path = Path(__file__).parent.parent.joinpath('data','hei_data.csv')
     data_df = pd.read_csv(data_path)
-    cols = ['HE Provider', 'Region of HE provider', 'UKPRN']
+    cols = ['HE Provider', 'UKPRN']
     data_df = data_df[cols]
 
     # Get the row for the UKPRN
     row = data_df[data_df['UKPRN'] == ukprn]
 
     he_name = row['HE Provider'].values[0]
-    region = row['Region of HE provider'].values[0]
     ukprn_value = row['UKPRN'].values[0]
+
+    #Load the entry data dataset
+    entry_data_path = Path(__file__).parent.parent.joinpath('data','entry_data.csv')
+    entry_data_df = pd.read_csv(entry_data_path)
+    cols = ['HE Provider', 'Category', 'Value', 'Academic Year']
+    entry_data_df = entry_data_df[cols]
+
+    # Filter the DataFrame by 'HE Provider' and the year 2021/22
+    he_entries = entry_data_df[(entry_data_df['HE Provider'] == he_name) & (entry_data_df['Academic Year'] == '2021/22')]
+
+    # Get the total income value for the HEI
+    total_income = he_entries[he_entries['Category'] == 'Total income (£)']
+    if not total_income.empty:
+        total_income_value = float(total_income['Value'].iloc[0])
+        formatted_income = format_number(total_income_value)
+    else:
+        formatted_income = "No data"
+
+    #Get the total scope 1 and 2 carbon emissions value for the HEI
+    total_scope_1_2 = he_entries[he_entries['Category'] == 'Total scope 1 and 2 carbon emissions (Kg CO2e)']
+    if not total_scope_1_2.empty:
+        total_scope_1_2_value = float(total_scope_1_2['Value'].iloc[0])
+        formatted_emissions = format_number(total_scope_1_2_value)
+    else:
+        formatted_emissions = "No data"
 
     # Create a card to display the HEI name, Region and UKPRN number
     card = dbc.Card(
@@ -142,9 +176,10 @@ def create_card(ukprn):
                 ),
             dbc.CardBody(
                 [
-                    html.H6(f"Region: {region}", className='card-subtitle'),
-                    html.Br(),
-                    html.H6(f"UKPRN: {ukprn_value}", className='card-subtitle'),
+                    html.H6(f"UKPRN: {ukprn_value}", className='card-subtitle pb-2'),
+                    html.H6("Key metrics (2021/22):", style={"font-weight": "bold"}),
+                    html.H6(f"Total income: £{formatted_income}", className='card-subtitle pb-2'),
+                    html.H6(f"Total scope 1 and 2 carbon emissions: {formatted_emissions} Kg CO2e", className='card-subtitle pb-2')
                 ]
             ),
         ]

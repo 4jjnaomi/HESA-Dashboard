@@ -6,3 +6,4 @@ selenium
 dash[testing]
 requests
 pytest-cov
+pytest-dash
