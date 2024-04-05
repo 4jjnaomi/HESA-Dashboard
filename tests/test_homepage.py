@@ -1,6 +1,16 @@
-import time
-from dash.testing.application_runners import import_app
+"""
+This module contains test cases for the homepage of the Dash app.
 
+The test cases include:
+- Checking if the homepage contains the expected components.
+- Testing if selecting a marker on the map updates the card.
+- Testing if selecting a region from the region dropdown 
+updates the HEI dropdown.
+- Testing if clicking on a link in the card opens the 
+university overview page.
+"""
+
+import time
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -8,27 +18,15 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
 
-def test_homepage_content(dash_duo):
-    """
+def test_homepage_content(dash_duo, navigate_to_page, wait_for_element):
+    """    
     GIVEN the Dash app is running
     WHEN a user navigates to the home page
     THEN the app should display the home page content
     """
 
-    # Get the Dash app
-    app = import_app(app_file='app')
-
-    # Start the Dash app
-    dash_duo.start_server(app)
-
-    # Navigate to the home page
-    dash_duo.driver.get(dash_duo.server_url + '/')
-
-    # Wait for the page to load
-    # Wait for the map to load
-    WebDriverWait(dash_duo.driver, 30).until(
-        EC.presence_of_element_located((By.CLASS_NAME, "geolayer"))
-    )
+    navigate_to_page('/')
+    wait_for_element((By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
 
     # Get the layout elements
     heading = dash_duo.driver.find_element(By.TAG_NAME, "h1")
@@ -46,7 +44,7 @@ def test_homepage_content(dash_duo):
     assert not card_div.is_displayed()
 
 
-def test_map_marker_select_updates_card(dash_duo):
+def test_map_marker_select_updates_card(dash_duo, navigate_to_page, wait_for_element):
     """
     GIVEN the app is running which has a <div id='map'>
     THEN there should not be any elements with a class of 'card' on the page
@@ -55,17 +53,10 @@ def test_map_marker_select_updates_card(dash_duo):
     AND there should be a text value for the h6 heading in the card
     """
 
-    # Get the Dash app
-    app = import_app(app_file='app')
+    navigate_to_page('/')
+    wait_for_element((By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
 
-    # Start the Dash app
-    dash_duo.start_server(app)
-
-    # Wait for the map to load
-    WebDriverWait(dash_duo.driver, 30).until(
-        EC.presence_of_element_located(
-            (By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
-    )
+    time.sleep(5)
 
     # Get the initial number of cards
     initial_num_cards = len(
@@ -100,7 +91,7 @@ def test_map_marker_select_updates_card(dash_duo):
     assert card_text != ""
 
 
-def test_region_dropdown_map_updates(dash_duo):
+def test_region_dropdown_map_updates(dash_duo, navigate_to_page, wait_for_element, click_element):
     """
     GIVEN the app is running which has a <div id='map'>
     WHEN a region is selected from the region dropdown
@@ -108,34 +99,21 @@ def test_region_dropdown_map_updates(dash_duo):
     AND the number of groups in the legend should be 1
     """
 
-    # Get the Dash app
-    app = import_app(app_file='app')
-
-    # Start the Dash app
-    dash_duo.start_server(app)
-
-    # Wait for the map to load
-    WebDriverWait(dash_duo.driver, 30).until(
-        EC.presence_of_element_located(
-            (By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
-    )
+    navigate_to_page('/')
+    wait_for_element((By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
 
     time.sleep(5)
 
-    # Find hei dropdown element
-    hei_dropdown_element = dash_duo.driver.find_element(
-        By.ID, "hei-dropdown-map")
-    hei_dropdown_element.click()
+    # Find hei  and click the hei dropdown element
+    click_element("hei-dropdown-map")
 
     # Count the number of option elements in the dropdown menu
     initial_hei_menu = dash_duo.driver.find_elements(
         By.CLASS_NAME, "VirtualizedSelectOption")
     initial_num_options = len(initial_hei_menu)
 
-    # Find the region dropdown element
-    region_dropdown_element = dash_duo.driver.find_element(
-        By.ID, "region-dropdown-map")
-    region_dropdown_element.click()
+    # Find and click the region dropdown element
+    click_element("region-dropdown-map")
 
     # Select the region dropdown input div
     region_dropdown_input_div = dash_duo.driver.find_element(
@@ -171,7 +149,7 @@ def test_region_dropdown_map_updates(dash_duo):
     assert updated_num_groups == 1
 
 
-def test_map_card_link_opens(dash_duo):
+def test_map_card_link_opens(dash_duo, navigate_to_page, wait_for_element):
     """
     GIVEN the app is running which has a <div id='map>
     WHEN a marker in the map is selected
@@ -180,17 +158,11 @@ def test_map_card_link_opens(dash_duo):
     WHEN the link is clicked
     THEN the page should navigate to the university overview page
     """
-    # Get the Dash app
-    app = import_app(app_file='app')
-
-    # Start the Dash app
-    dash_duo.start_server(app)
+    # Navigate to the home page
+    navigate_to_page('/')
 
     # Wait for the map to load
-    WebDriverWait(dash_duo.driver, 30).until(
-        EC.presence_of_element_located(
-            (By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
-    )
+    wait_for_element((By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
 
     time.sleep(5)
 

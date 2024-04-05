@@ -1,3 +1,8 @@
+"""
+This script defines a Dash application that displays an HEI Environmental Dashboard.
+It includes functions to create a navigation bar and a footer, as well as the layout of the application.
+"""
+
 import dash
 from dash import html, dcc, Dash
 import dash_bootstrap_components as dbc
@@ -16,9 +21,12 @@ app = Dash(__name__, external_stylesheets=external_stylesheets,
            meta_tags=meta_tags, use_pages=True, suppress_callback_exceptions=True)
 
 # Function to create a navigation bar with links to different pages
-
-
 def create_navbar():
+    """
+    Creates a navigation bar with links to different pages.
+    Returns:
+        dbc.NavbarSimple: The navigation bar component.
+    """
     return dbc.NavbarSimple(
         children=[
             dbc.NavItem(dbc.NavLink(
@@ -34,9 +42,12 @@ def create_navbar():
     )
 
 # Function to create the footer
-
-
 def create_footer():
+    """
+    Creates the footer of the application.
+    Returns:
+        dbc.Container: The container component containing the footer.
+    """
     return dbc.Container(
         dbc.Row(
             [dbc.Col(

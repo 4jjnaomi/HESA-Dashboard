@@ -1,29 +1,23 @@
-from dash.testing.application_runners import import_app
+"""
+This module contains tests for the ranking table page.
+
+The tests include:
+- Checking if the ranking table page contains the expected components.
+- Testing if selecting options in the dropdowns updates the table.
+"""
 
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait, Select
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
-def test_ranking_table_layout(dash_duo):
+def test_ranking_table_layout(dash_duo, navigate_to_page, wait_for_element):
     """
     GIVEN the Dash app is running
     WHEN the user navigates to the ranking table page
     THEN the layout should contain the expected components
     """
 
-    # Get the Dash app
-    app = import_app(app_file='app')
-
-    # Start the Dash app
-    dash_duo.start_server(app)
-
-    # Navigate to the ranking table page
-    dash_duo.driver.get(dash_duo.server_url + '/ranking_table')
-
-    # Wait for the table to load
-    WebDriverWait(dash_duo.driver, 10).until(
-        EC.presence_of_element_located((By.ID, "ranking-table"))
-    )
+    navigate_to_page('/ranking_table')
+    wait_for_element((By.ID, "ranking-table"))
 
     # Get the layout elements
     class_dropdown = dash_duo.find_element("#class-dropdown-rank")
@@ -35,37 +29,20 @@ def test_ranking_table_layout(dash_duo):
     assert year_dropdown.is_displayed()
     assert table_div.is_displayed()
 
-def test_ranking_table_callback(dash_duo):
+def test_ranking_table_callback(dash_duo, navigate_to_page, wait_for_element, choose_select_dbc_option):
     """
     GIVEN the Dash app is running
     WHEN the user selects options in the dropdowns
     THEN the table should update accordingly
     """
 
-    # Get the Dash app
-    app = import_app(app_file='app')
-
-    # Start the Dash app
-    dash_duo.start_server(app)
-
-    # Navigate to the ranking table page
-    dash_duo.driver.get(dash_duo.server_url + '/ranking_table')
-
-    # Wait for the table to load
-    WebDriverWait(dash_duo.driver, 10).until(
-        EC.presence_of_element_located((By.ID, "ranking-table"))
-    )
+    navigate_to_page('/ranking_table')
+    wait_for_element((By.ID, "ranking-table"))  
 
     # Get the initial table content
     initial_table_content = dash_duo.find_element("#ranking-table").text
 
-    # Find the class dropdown element
-    class_dropdown_element = dash_duo.driver.find_element(By.ID, "class-dropdown-rank")
-    # Initialize Select object for the class dropdown
-    class_dropdown = Select(class_dropdown_element)
-
-    # Select the option with value "Finances and people"
-    class_dropdown.select_by_value("Finances and people")
+    choose_select_dbc_option("class-dropdown-rank", "Finances and people")
 
     # Wait for the table content to change
     WebDriverWait(dash_duo.driver, 10).until(

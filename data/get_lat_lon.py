@@ -1,3 +1,12 @@
+"""
+This script geocodes the HEI (Higher Education Institution) names within the bounding box of England and updates the latitude and longitude values in the given DataFrame.
+
+The script uses the geopy library to perform geocoding and the Nominatim geocoder to obtain the latitude and longitude coordinates of the HEIs. It maps alternative names of universities to their corresponding names in the DataFrame and creates a new column for the alternative names. The latitude and longitude values are then updated for each HEI in the DataFrame.
+
+The updated DataFrame is saved to a CSV file and the script also prints the message 'Latitude and Longitude added to the dataset' once the process is complete.
+
+"""
+
 from pathlib import Path
 import time
 
@@ -59,6 +68,20 @@ heis = data_df['Alternative Name']
 
 
 def get_lat_lon(heis1, data_df1):
+    """
+    Geocodes the HEI names within the bounding box of England and updates the latitude and longitude values in the given DataFrame.
+
+    Args:
+        heis1 (list): A list of HEI names to geocode.
+        data_df1 (pandas.DataFrame): The DataFrame containing the data to be updated.
+
+    Returns:
+        pandas.DataFrame: The updated DataFrame with latitude and longitude values.
+
+    Raises:
+        Exception: If there is an error during geocoding.
+
+    """
     hei_array = heis1
     for i in hei_array:
         retry_count = 0

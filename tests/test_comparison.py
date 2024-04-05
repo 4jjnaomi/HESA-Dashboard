@@ -1,3 +1,13 @@
+"""
+This module contains tests for the comparison page of the Dash app.
+
+The tests include:
+- Checking if the comparison page contains the expected components.
+- Testing if selecting options in the dropdowns updates the bar chart.
+- Testing if the category marker dropdown options remain 
+unchanged when the class dropdown has no value selected.
+"""
+
 import time
 from dash.testing.application_runners import import_app
 
