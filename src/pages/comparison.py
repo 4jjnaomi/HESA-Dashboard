@@ -1,27 +1,27 @@
 """
 This module contains the layout and callbacks for the HEI Comparison page.
 
-The page allows users to compare the performance of different Higher 
-Education Institutions (HEIs) in various environmental categories. 
-Users can select the year, class, category marker, category, 
+The page allows users to compare the performance of different Higher
+Education Institutions (HEIs) in various environmental categories.
+Users can select the year, class, category marker, category,
 and HEIs to compare on a bar chart.
 
 The module defines the following components:
 - create_dropdown: A function to create a dropdown component.
 - year_dropdown: A dropdown component for selecting the year(s).
 - class_dropdown: A dropdown component for selecting the class.
-- category_marker_dropdown: A dropdown component for selecting 
+- category_marker_dropdown: A dropdown component for selecting
 the category marker.
 - category_dropdown: A dropdown component for selecting the category.
 - hei_dropdown: A dropdown component for selecting the HEIs to compare.
 - layout: The layout of the page.
 
 The module also defines the following callback functions:
-- update_category_marker_dropdown_comparison: A callback function 
+- update_category_marker_dropdown_comparison: A callback function
 to update the category marker dropdown based on the selected class.
-- update_category_dropdown_comparison: A callback function to 
+- update_category_dropdown_comparison: A callback function to
 update the category dropdown based on the selected category marker.
-- update_bar_chart: A callback function to update the bar chart 
+- update_bar_chart: A callback function to update the bar chart
 based on the selected HEIs, year(s), and category.
 """
 

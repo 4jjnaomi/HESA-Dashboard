@@ -1,5 +1,5 @@
 """
-This module contains the layout for the overview page of the app. 
+This module contains the layout for the overview page of the app.
 The overview page is where users can see how a specific university has
 performed between 2018/19 - 2021/22 in various environmental categories.
 Users can also analyse other universities using the sidebar.
@@ -15,9 +15,9 @@ The module defines the following components:
 The module also defines the following callback functions:
 - toggle_collapse: A callback function to toggle the sidebar.
 - update_nav: A callback function to update the sidebar navigation links based on the search input.
-- update_category_marker_dropdown_overview: A callback function to 
+- update_category_marker_dropdown_overview: A callback function to
 update the category marker dropdown based on the selected class.
-- update_line_chart: A callback function to update the line 
+- update_line_chart: A callback function to update the line
 chart based on the selected class and category marker.
 """
 
@@ -62,7 +62,6 @@ def generate_sidebar_links():
     data = Path(__file__).parent.parent.parent.joinpath('data', 'hei_data.csv')
     universities = pd.read_csv(data)['HE Provider']
     return [{"children": uni, "href": f"/university/{uni}", "active": "exact"} for uni in universities]
-
 
 def create_sidebar():
     """

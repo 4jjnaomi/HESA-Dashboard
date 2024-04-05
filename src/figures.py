@@ -2,28 +2,28 @@
 This module contains functions for creating various visualizations and data manipulation operations.
 
 Functions:
-- load_data(file_path, columns): Loads data from a CSV file and 
+- load_data(file_path, columns): Loads data from a CSV file and
 returns a DataFrame with specified columns.
-- filter_dataframe(data_df, filters): Filters a DataFrame based on 
+- filter_dataframe(data_df, filters): Filters a DataFrame based on
 specified column-value pairs.
-- create_scatter_mapbox(region=None, hei=None): Creates a scatter 
+- create_scatter_mapbox(region=None, hei=None): Creates a scatter
 mapbox plot of HE providers' locations.
-- filter_data_for_table(data_df, ClassName, acedemic_year, 
-selected_regions): Filters data for creating a table based on 
+- filter_data_for_table(data_df, ClassName, acedemic_year,
+selected_regions): Filters data for creating a table based on
 specified criteria.
-- format_number(number): Formats a number with appropriate suffixes 
+- format_number(number): Formats a number with appropriate suffixes
 (e.g., k, M, B).
 - create_card(ukprn): Creates a card with key metrics for a specific HE provider.
 - create_line_chart(hei=None, Class=None, category_marker=None): Creates
 a line chart showing trends of categories for a specific HE provider and class.
-- create_options_from_data(data_df, column): Creates a list of 
+- create_options_from_data(data_df, column): Creates a list of
 options from unique values in a DataFrame column.
-- create_bar_chart(hei=None, year=None, category=None): Creates a 
+- create_bar_chart(hei=None, year=None, category=None): Creates a
 bar chart showing values for a specific HE provider, year, and category.
-- create_ranking_table(ClassName=None, academic_year=None, selected_regions=None): Creates a ranking table based on 
+- create_ranking_table(ClassName=None, academic_year=None,selected_regions=None): Creates a ranking table based on
 specified criteria.
 - create_category_marker_options(class_name): Creates a list of category marker options for a specific class.
-- create_category_options(category_marker): Creates a list of category 
+- create_category_options(category_marker): Creates a list of category
 options for a specific category marker.
 """
 
@@ -57,7 +57,7 @@ def filter_dataframe(data_df, filters):
 
     Args:
         data_df (pandas.DataFrame): The DataFrame to be filtered.
-        filters (dict): A dictionary where the keys are column 
+        filters (dict): A dictionary where the keys are column
         names and the values are lists of values to filter on.
 
     Returns:
@@ -301,11 +301,11 @@ def create_bar_chart(hei=None, year=None, category=None):
     Create a bar chart based on the provided parameters.
 
     Args:
-        hei (list, optional): List of Higher Education Institutions 
+        hei (list, optional): List of Higher Education Institutions
         (HEI) to include in the chart. Defaults to None.
-        year (list, optional): List of academic years to include in 
+        year (list, optional): List of academic years to include in
         the chart. Defaults to None.
-        category (str, optional): Category of data to include in the 
+        category (str, optional): Category of data to include in the
         chart. Defaults to None.
 
     Returns:
