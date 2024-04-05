@@ -131,7 +131,8 @@ def create_scatter_mapbox(region=None, hei=None):
     # Update layout
     fig.update_layout(mapbox_style="carto-positron", mapbox_zoom=4.8,
                       mapbox_center={
-                          "lat": df_loc['lat'].mean(), "lon": df_loc['lon'].mean()}, # Center map on average location
+                          # Center map on average location
+                          "lat": df_loc['lat'].mean(), "lon": df_loc['lon'].mean()},
                       margin={"r": 0, "t": 0, "l": 0, "b": 0}, width=800, height=370,
                       legend_title_text='Region', showlegend=True)
     return fig
@@ -181,7 +182,8 @@ def format_number(number):
         magnitude += 1
         # Divide the number by 1000
         number /= 1000.0
-    return f"{round(number, 3)}{suffixes[magnitude]}" # Round the number to 3 decimal places
+    # Round the number to 3 decimal places
+    return f"{round(number, 3)}{suffixes[magnitude]}"
 
 
 def create_card(ukprn):
@@ -230,7 +232,8 @@ def create_card(ukprn):
 
     card = dbc.Card([
         dbc.CardHeader(html.A(
-            html.H4(he_name, className='card-title'), href=f"/university/{he_name}")), # Add a link to the university page
+            # Add a link to the university page
+            html.H4(he_name, className='card-title'), href=f"/university/{he_name}")),
         dbc.CardBody([
             html.H6(f"UKPRN: {ukprn_value}", className='card-subtitle pb-2'),
             # Add key metrics
@@ -363,7 +366,7 @@ def create_ranking_table(ClassName=None, academic_year=None, selected_regions=No
         ['HE Provider'] + new_category_order]
     # Sort the columns based on the category order
     pivot_df.columns.name = None
-    #Change the HE Provider column to a hyperlink in html format
+    # Change the HE Provider column to a hyperlink in html format
     pivot_df['HE Provider'] = pivot_df['HE Provider'].apply(
         lambda x: f"<a href=/university/{quote(x)}>{x}</a>")
     # Create the ranking table

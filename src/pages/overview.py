@@ -99,6 +99,7 @@ def create_nav_links(links):
     """
     return [dbc.NavLink(link["children"], href=link["href"], active=link["active"]) for link in links]
 
+
 # Create the components
 class_dropdown = dbc.Select(id="class-dropdown", options=[{"label": cls, "value": cls} for cls in ["Building and spaces", "Energy",
                             "Emissions and waste", "Transport and environment", "Finances and people"]], placeholder="Choose a class to see options for 'Category Marker'")
@@ -109,6 +110,8 @@ category_marker_dropdown = dbc.Select(
 line_chart = create_line_chart(None, None, None)
 
 # Define the layout of the page
+
+
 def layout(he_provider=None):
     """
     Generates the layout for the overview page.

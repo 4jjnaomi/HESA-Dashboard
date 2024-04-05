@@ -21,6 +21,8 @@ app = Dash(__name__, external_stylesheets=external_stylesheets,
            meta_tags=meta_tags, use_pages=True, suppress_callback_exceptions=True)
 
 # Function to create a navigation bar with links to different pages
+
+
 def create_navbar():
     """
     Creates a navigation bar with links to different pages.
@@ -42,6 +44,8 @@ def create_navbar():
     )
 
 # Function to create the footer
+
+
 def create_footer():
     """
     Creates the footer of the application.

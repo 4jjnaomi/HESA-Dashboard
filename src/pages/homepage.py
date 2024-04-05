@@ -99,7 +99,7 @@ def layout():
                for region in data_df['Region of HE provider'].unique()]
     heis = [{'label': hei, 'value': hei}
             for hei in data_df['HE Provider'].unique()]
-    
+
     # Create the buttons
     button1 = create_button("Ranking Table", "/ranking_table")
     button2 = create_button(
@@ -118,7 +118,7 @@ def layout():
     row_two = html.Div([html.P(
         'This dashboard provides an overview of the environmental performance of Higher Education Institutions (HEIs) in England.')])
     row_three = create_row([dbc.Col(button1, width=4), dbc.Col(
-        button2, width=4), dbc.Col(button3, width=4)]) # 3 buttons in a row
+        button2, width=4), dbc.Col(button3, width=4)])  # 3 buttons in a row
 
     row_four = create_row([
         dbc.Col(children=[
@@ -126,10 +126,11 @@ def layout():
                    "font-size": "14px"}),
             html.P(children=["Filter Regions", region_dropdown],
                    style={"background-color": "lightgrey"}),
-            html.P(["Filter HEIs", hei_dropdown], style={"background-color": "lightgrey"})], width=2), # filters on the left
+            # filters on the left
+            html.P(["Filter HEIs", hei_dropdown], style={"background-color": "lightgrey"})], width=2),
         dbc.Col(children=[dcc.Graph(
-            figure=create_scatter_mapbox(), id='england_map')], width=8), # map in the middle
-        dbc.Col(children=[html.Div(id='card')], width=2) # card on the right
+            figure=create_scatter_mapbox(), id='england_map')], width=8),  # map in the middle
+        dbc.Col(children=[html.Div(id='card')], width=2)  # card on the right
     ])
 
     layout_page = dbc.Container([row_one, row_two, row_three, row_four])
@@ -150,12 +151,12 @@ def update_hei_options(selected_regions):
     Returns:
         list: The updated options for the HEI dropdown.
     """
-    if selected_regions: # if regions are selected, show only HEIs in those regions
+    if selected_regions:  # if regions are selected, show only HEIs in those regions
         heis_in_selected_regions = data_df[data_df['Region of HE provider'].isin(
             selected_regions)]['HE Provider']
         hei_options = [{'label': hei, 'value': hei}
                        for hei in heis_in_selected_regions]
-    else: # if no regions are selected, show all HEIs
+    else:  # if no regions are selected, show all HEIs
         hei_options = [{'label': hei, 'value': hei}
                        for hei in data_df['HE Provider']]
 
@@ -178,8 +179,8 @@ def update_map(selected_regions, selected_heis):
     Returns:
           go.Figure: the updated Plotly graph objects Scatter mapbox plot with the filters applied if applicable.
     """
-    ctx = callback_context # get the context of the callback
-    if ctx.triggered: # if the callback was triggered
+    ctx = callback_context  # get the context of the callback
+    if ctx.triggered:  # if the callback was triggered
         prop_id = ctx.triggered[0]['prop_id']
         # check which dropdown was changed
         # if the region dropdown was changed, update the map with the selected regions

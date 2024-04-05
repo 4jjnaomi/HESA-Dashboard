@@ -26,7 +26,8 @@ def test_homepage_content(dash_duo, navigate_to_page, wait_for_element):
     """
 
     navigate_to_page('/')
-    wait_for_element((By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
+    wait_for_element(
+        (By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
 
     # Get the layout elements
     heading = dash_duo.driver.find_element(By.TAG_NAME, "h1")
@@ -54,7 +55,8 @@ def test_map_marker_select_updates_card(dash_duo, navigate_to_page, wait_for_ele
     """
 
     navigate_to_page('/')
-    wait_for_element((By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
+    wait_for_element(
+        (By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
 
     time.sleep(5)
 
@@ -100,7 +102,8 @@ def test_region_dropdown_map_updates(dash_duo, navigate_to_page, wait_for_elemen
     """
 
     navigate_to_page('/')
-    wait_for_element((By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
+    wait_for_element(
+        (By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
 
     time.sleep(5)
 
@@ -162,7 +165,8 @@ def test_map_card_link_opens(dash_duo, navigate_to_page, wait_for_element):
     navigate_to_page('/')
 
     # Wait for the map to load
-    wait_for_element((By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
+    wait_for_element(
+        (By.CSS_SELECTOR, "#england_map > div.js-plotly-plot > div > div > svg:nth-child(5)"))
 
     time.sleep(5)
 

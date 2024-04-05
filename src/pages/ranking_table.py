@@ -41,7 +41,8 @@ region_dropdown = dcc.Dropdown(
     id="region-dropdown-map",
     placeholder="Filter Regions",
     multi=True,
-    options=[{"label": region, "value": region} for region in ["East Midlands", "East of England", "London", "North East", "North West", "South East", "South West", "West Midlands", "Yorkshire and The Humber"]]
+    options=[{"label": region, "value": region} for region in ["East Midlands", "East of England", "London",
+                                                               "North East", "North West", "South East", "South West", "West Midlands", "Yorkshire and The Humber"]]
 )
 
 table = create_ranking_table()

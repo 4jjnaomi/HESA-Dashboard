@@ -46,7 +46,7 @@ def test_navbar_links(dash_duo, navigate_to_page, wait_for_element, link_index, 
 
     navigate_to_page('/')
 
-    #Wait for the navbar to load
+    # Wait for the navbar to load
     wait_for_element((By.CLASS_NAME, 'navbar'))
 
     # Get the navbar
@@ -60,7 +60,7 @@ def test_navbar_links(dash_duo, navigate_to_page, wait_for_element, link_index, 
 
     # Wait for the page to load
     WebDriverWait(dash_duo.driver, 30).until(
-    EC.url_to_be(dash_duo.server_url + expected_url))
+        EC.url_to_be(dash_duo.server_url + expected_url))
 
     # Assert that the URL has changed to the correct page
     assert dash_duo.driver.current_url == dash_duo.server_url + expected_url

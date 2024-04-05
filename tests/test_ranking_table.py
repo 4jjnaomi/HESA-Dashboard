@@ -9,6 +9,7 @@ The tests include:
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
+
 def test_ranking_table_layout(dash_duo, navigate_to_page, wait_for_element):
     """
     GIVEN the Dash app is running
@@ -29,6 +30,7 @@ def test_ranking_table_layout(dash_duo, navigate_to_page, wait_for_element):
     assert year_dropdown.is_displayed()
     assert table_div.is_displayed()
 
+
 def test_ranking_table_callback(dash_duo, navigate_to_page, wait_for_element, choose_select_dbc_option):
     """
     GIVEN the Dash app is running
@@ -37,7 +39,7 @@ def test_ranking_table_callback(dash_duo, navigate_to_page, wait_for_element, ch
     """
 
     navigate_to_page('/ranking_table')
-    wait_for_element((By.ID, "ranking-table"))  
+    wait_for_element((By.ID, "ranking-table"))
 
     # Get the initial table content
     initial_table_content = dash_duo.find_element("#ranking-table").text
@@ -46,7 +48,8 @@ def test_ranking_table_callback(dash_duo, navigate_to_page, wait_for_element, ch
 
     # Wait for the table content to change
     WebDriverWait(dash_duo.driver, 10).until(
-        lambda driver: dash_duo.find_element("#ranking-table").text != initial_table_content
+        lambda driver: dash_duo.find_element(
+            "#ranking-table").text != initial_table_content
     )
 
     # Get the updated table content

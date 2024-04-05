@@ -30,16 +30,19 @@ def pytest_setup_options():
         options.add_argument("--start-maximized")
     return options
 
+
 @pytest.fixture
 def dash_app():
     """Fixture to create a Dash app instance."""
     app = import_app(app_file='app')
     return app
 
+
 @pytest.fixture
 def start_dash_app(dash_duo, dash_app):
     """Fixture to start the Dash app."""
     dash_duo.start_server(dash_app)
+
 
 @pytest.fixture
 def wait_for_element(dash_duo):
@@ -50,6 +53,7 @@ def wait_for_element(dash_duo):
         )
     return _wait_for_element
 
+
 @pytest.fixture
 def navigate_to_page(start_dash_app, dash_duo):
     """Fixture to navigate to a specific page."""
@@ -57,16 +61,18 @@ def navigate_to_page(start_dash_app, dash_duo):
         dash_duo.driver.get(dash_duo.server_url + page_url)
     return _navigate_to_page
 
+
 @pytest.fixture
 def click_element(dash_duo):
     """Fixture to find and click a dropdown element."""
     def _click_element(dropdown_id):
-        #Get the element
+        # Get the element
         element = dash_duo.driver.find_element(By.ID, dropdown_id)
-        #Click the element
+        # Click the element
         element.click()
 
     return _click_element
+
 
 @pytest.fixture
 def choose_select_dbc_option(dash_duo, wait_for_element):
@@ -76,9 +82,8 @@ def choose_select_dbc_option(dash_duo, wait_for_element):
         wait_for_element((By.ID, select_id))
         # Find the select component
         select = dash_duo.driver.find_element(By.ID, select_id)
-        #Initialize Select object for the select component
+        # Initialize Select object for the select component
         select_object = Select(select)
         # Select the option with the specified value
         select_object.select_by_value(option_value)
     return _choose_select_dbc_option
-        

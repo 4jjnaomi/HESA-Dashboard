@@ -20,6 +20,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 
+
 def test_overview_page_layout(dash_duo, navigate_to_page, wait_for_element):
     """
     GIVEN the Dash app is running
@@ -35,13 +36,15 @@ def test_overview_page_layout(dash_duo, navigate_to_page, wait_for_element):
 
     # Get the layout elements
     class_dropdown = dash_duo.driver.find_element(By.ID, "class-dropdown")
-    category_marker_dropdown = dash_duo.driver.find_element(By.ID, "category-marker-dropdown")
+    category_marker_dropdown = dash_duo.driver.find_element(
+        By.ID, "category-marker-dropdown")
     toggle_button = dash_duo.driver.find_element(By.ID, "toggle")
 
     # Assert that the layout contains the expected components
     assert class_dropdown.is_displayed()
     assert category_marker_dropdown.is_displayed()
     assert toggle_button.is_displayed()
+
 
 def test_overview_update_line_chart(dash_duo, navigate_to_page, wait_for_element, choose_select_dbc_option):
     """
@@ -50,7 +53,7 @@ def test_overview_update_line_chart(dash_duo, navigate_to_page, wait_for_element
     AND selects a category marker from the dropdown
     THEN the line chart should update accordingly
     """
-    
+
     # Navigate to the overview page
     navigate_to_page('/university/University College London')
 
@@ -58,24 +61,28 @@ def test_overview_update_line_chart(dash_duo, navigate_to_page, wait_for_element
     wait_for_element((By.ID, "overview_line_chart"))
 
     # Get the initial line chart content
-    initial_line_chart_content = dash_duo.find_element("#overview_line_chart").text
+    initial_line_chart_content = dash_duo.find_element(
+        "#overview_line_chart").text
 
     # Select the option with value "Building and spaces" from the class dropdown
     choose_select_dbc_option("class-dropdown", "Building and spaces")
 
-    #Select the option with value 'Grounds area' from the category marker dropdown
+    # Select the option with value 'Grounds area' from the category marker dropdown
     choose_select_dbc_option("category-marker-dropdown", "Grounds area")
 
     # Wait for the line chart content to change
     WebDriverWait(dash_duo.driver, 30).until(
-        lambda driver: dash_duo.find_element("#overview_line_chart").text != initial_line_chart_content
+        lambda driver: dash_duo.find_element(
+            "#overview_line_chart").text != initial_line_chart_content
     )
 
     # Get the updated line chart content
-    updated_line_chart_content = dash_duo.find_element("#overview_line_chart").text
+    updated_line_chart_content = dash_duo.find_element(
+        "#overview_line_chart").text
 
     # Assert that the line chart content has been updated
     assert updated_line_chart_content != initial_line_chart_content
+
 
 def test_toggle_sidebar_button(dash_duo, navigate_to_page, wait_for_element, click_element):
     """
@@ -84,7 +91,7 @@ def test_toggle_sidebar_button(dash_duo, navigate_to_page, wait_for_element, cli
     AND clicks on the toggle sidebar button
     THEN the sidebar should expand accordingly
     """
-    
+
     navigate_to_page('/university/University College London')
     wait_for_element((By.ID, "collapse"))
 
@@ -97,7 +104,8 @@ def test_toggle_sidebar_button(dash_duo, navigate_to_page, wait_for_element, cli
     )
 
     # Get the updated state of the sidebar
-    updated_sidebar_state = dash_duo.find_element("#collapse").get_attribute("class")
+    updated_sidebar_state = dash_duo.find_element(
+        "#collapse").get_attribute("class")
 
     # Assert that the sidebar has expanded
     assert "show" in updated_sidebar_state
@@ -111,10 +119,12 @@ def test_toggle_sidebar_button(dash_duo, navigate_to_page, wait_for_element, cli
 
     )
     # Get the updated state of the sidebar
-    updated_sidebar_state = dash_duo.find_element("#collapse").get_attribute("class")
+    updated_sidebar_state = dash_duo.find_element(
+        "#collapse").get_attribute("class")
 
     # Assert that the sidebar has collapsed
     assert "show" not in updated_sidebar_state
+
 
 def test_sidebar_search(dash_duo, navigate_to_page, wait_for_element, click_element):
     """
@@ -146,10 +156,12 @@ def test_sidebar_search(dash_duo, navigate_to_page, wait_for_element, click_elem
         lambda driver: len(dash_duo.find_elements(".sidebar-nav-link")) < 5
     )
 
-    #Check that the universities displayed in the sidebar are the ones that match the search term
+    # Check that the universities displayed in the sidebar are the ones that match the search term
     nav_links = dash_duo.find_elements(".sidebar-nav-link")
     for nav_link in nav_links:
-        assert "Bath" in nav_link.text, f"Expected 'Bath' in nav link text, but got: {nav_link.text}"
+        assert "Bath" in nav_link.text, f"Expected 'Bath' in nav link text, but got: {
+            nav_link.text}"
+
 
 def test_sidebar_link(dash_duo, navigate_to_page, wait_for_element, click_element):
     """
@@ -165,7 +177,8 @@ def test_sidebar_link(dash_duo, navigate_to_page, wait_for_element, click_elemen
     click_element("toggle")
 
     WebDriverWait(dash_duo.driver, 10).until(
-    EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#sidebar-nav > a:nth-child(1)"))
+        EC.presence_of_all_elements_located(
+            (By.CSS_SELECTOR, "#sidebar-nav > a:nth-child(1)"))
     )
 
     # Get the first university link in the sidebar
@@ -185,13 +198,14 @@ def test_sidebar_link(dash_duo, navigate_to_page, wait_for_element, click_elemen
     # Assert that the URL has changed to the university overview page
     assert f'/university/{university_name}' in dash_duo.driver.current_url
 
+
 def test_non_existent_university_overview(dash_duo, navigate_to_page, wait_for_element):
     """
     GIVEN the Dash app is running
     WHEN the user goes to the overview page of a non-existent university
     THEN the app should display a message that the university was not found
     """
-    
+
     # Navigate to a non-existent university overview page
     navigate_to_page('/university/NonExistentUniversity')
     wait_for_element((By.TAG_NAME, "h1"))
@@ -201,6 +215,7 @@ def test_non_existent_university_overview(dash_duo, navigate_to_page, wait_for_e
 
     # Assert that the h1 element contains the expected text
     assert "University not found" in h1_text
+
 
 def test_update_category_marker_dropdown_no_class_name(dash_duo):
     """
@@ -216,7 +231,8 @@ def test_update_category_marker_dropdown_no_class_name(dash_duo):
     dash_duo.start_server(app)
 
     # Navigate to the overview page
-    dash_duo.driver.get(dash_duo.server_url + '/university/University College London')
+    dash_duo.driver.get(dash_duo.server_url +
+                        '/university/University College London')
 
     # Wait for the page to load
     WebDriverWait(dash_duo.driver, 30).until(
@@ -224,20 +240,24 @@ def test_update_category_marker_dropdown_no_class_name(dash_duo):
     )
 
     # Initialise the Select object for the category marker dropdown
-    category_marker_dropdown_element = dash_duo.driver.find_element(By.ID, "category-marker-dropdown")
+    category_marker_dropdown_element = dash_duo.driver.find_element(
+        By.ID, "category-marker-dropdown")
     category_marker_dropdown = Select(category_marker_dropdown_element)
 
     # Get the initial state of the category marker dropdown options and value
-    initial_options = [option.text for option in category_marker_dropdown.options]
+    initial_options = [
+        option.text for option in category_marker_dropdown.options]
     initial_value = category_marker_dropdown.first_selected_option.text
 
     # Simulate not selecting any option from the class dropdown to trigger the callback
-    class_dropdown_element = dash_duo.driver.find_element(By.ID, "class-dropdown")
+    class_dropdown_element = dash_duo.driver.find_element(
+        By.ID, "class-dropdown")
     class_dropdown = Select(class_dropdown_element)
     class_dropdown.select_by_value("")
 
     # Get the updated state of the category marker dropdown options and value
-    updated_options = [option.text for option in category_marker_dropdown.options]
+    updated_options = [
+        option.text for option in category_marker_dropdown.options]
     updated_value = category_marker_dropdown.first_selected_option.text
 
     # Assert that options and value remain unchanged

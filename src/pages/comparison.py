@@ -35,6 +35,7 @@ from figures import create_category_marker_options, create_category_options, cre
 # Register the page with the Dash app
 register_page(__name__, name="HEI Comparison", path='/comparison')
 
+
 def create_dropdown(id1, options, placeholder, multi=False, dropdown_type='dcc'):
     """
     Create a dropdown component based on the specified dropdown_type.
