@@ -1,6 +1,8 @@
-# COMP0034 2023/24 Coursework 2 repostitory
+# COMP0034 2023/24 Coursework 2 repository
 
-In this coursework, I created a dashboard application that uses Dash and the Estates Management Record from HESA. To run the app:
+In this coursework, I created a dashboard application that uses Dash and the Estates Management Record from HESA. The data used in this dashboard app was obtained by HESA and cleaned & prepared by me. Details of data cleaning can be seen here: [https://github.com/4jjnaomi/HESA-DataCleaning](https://github.com/4jjnaomi/HESA-DataCleaning)
+
+To run the app:
 
 1. Fork this repository: [https://github.com/ucl-comp0035/comp0034-cw2i-4jjnaomi](https://github.com/ucl-comp0035/comp0034-cw2i-4jjnaomi)
 2. Clone the resulting repository locally and to your IDE
@@ -14,7 +16,7 @@ In this coursework, I created a dashboard application that uses Dash and the Est
 6. Open a browser and go to [http://127.0.0.1:8051/](http://127.0.0.1:8051/)
 7. Go to the various URLs outlined in List of URLs below
 8. Stop the app using `CTRL+C`
-9. Run tests using `pytest -v` or looks at the Github Actions workflows to see previous runs of tests
+9. Run tests using `pytest -v` or look at the GitHub Actions workflows to see previous runs of tests
 
 **List of URLs**
 
